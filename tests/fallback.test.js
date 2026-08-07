@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { generateLocalFallbackReply } from '../server.js';
+import { generateLocalFallbackReply } from '../server/controllers/chatController.js';
 
 test('returns safety-focused guidance for breathing symptoms', () => {
     const reply = generateLocalFallbackReply('I am wheezing and short of breath', []);

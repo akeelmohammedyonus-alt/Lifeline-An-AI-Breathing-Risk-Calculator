@@ -1,11 +1,12 @@
 {
     "name": "lifeline-ai-breathing-calculator",
     "version": "1.0.0",
-    "description": "AI-powered breathing risk assistant backend",
+    "description": "AI-powered breathing risk assistant web server",
     "type": "module",
-    "main": "server.js",
+    "main": "server/server.js",
     "scripts": {
-        "start": "node server.js"
+        "start": "node server/server.js",
+        "test": "node --test"
     },
     "dependencies": {
         "cors": "^2.8.5",

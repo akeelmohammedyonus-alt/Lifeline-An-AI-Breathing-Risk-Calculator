@@ -258,8 +258,27 @@
 
         .chat-msg.ai {
             background: rgba(33, 150, 243, 0.1);
-            color: #81C784;
+            color: #E3F2FD;
             border-left: 3px solid #2196F3;
+        }
+
+        .chat-msg p {
+            margin: 4px 0;
+            line-height: 1.5;
+        }
+
+        .chat-msg ul {
+            margin: 6px 0 0 16px;
+            padding-left: 10px;
+        }
+
+        .chat-msg li {
+            margin: 4px 0;
+            line-height: 1.4;
+        }
+
+        .chat-msg strong {
+            color: #B3E5FC;
         }
 
         .chat-input-row {
@@ -735,11 +754,42 @@
             return data.reply || "Sorry, I could not get a response from the AI server.";
         }
 
+        function formatChatText(text) {
+            const escapeHtml = (value) => String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+
+            const formatInline = (value) => escapeHtml(value)
+                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                .replace(/\*(.*?)\*/g, "<em>$1</em>");
+
+            const blocks = String(text || "")
+                .split(/\n\s*\n/)
+                .map((block) => block.trim())
+                .filter(Boolean);
+
+            return blocks.map((block) => {
+                const lines = block.split(/\n/).map((line) => line.trim()).filter(Boolean);
+                const isList = lines.every((line) => /^([-*•]|\d+\.)\s+/.test(line));
+
+                if (isList) {
+                    const items = lines.map((line) => {
+                        const content = line.replace(/^([-*•]|\d+\.)\s+/, "");
+                        return `<li>${formatInline(content)}</li>`;
+                    });
+                    return `<ul>${items.join("")}</ul>`;
+                }
+
+                return `<p>${lines.map((line) => formatInline(line)).join("<br>")}</p>`;
+            }).join("");
+        }
+
         function addChat(type, text) {
             const box = document.getElementById("chatBox");
             const msg = document.createElement("div");
             msg.className = `chat-msg ${type}`;
-            msg.innerHTML = `<b>${type === "user" ? "You" : "LifeLine AI"}:</b> ${text}`;
+            msg.innerHTML = `<b>${type === "user" ? "You" : "LifeLine AI"}:</b> ${formatChatText(text)}`;
             box.appendChild(msg);
             box.scrollTop = box.scrollHeight;
         }
