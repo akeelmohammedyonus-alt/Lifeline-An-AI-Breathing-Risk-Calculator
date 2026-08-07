@@ -691,7 +691,7 @@
         }
 
         // Enhanced AI Chat with Context Awareness
-        function handleChat() {
+        async function handleChat() {
             const input = document.getElementById("chatInput").value.trim();
             if (!input) return;
 
@@ -700,14 +700,39 @@
             const btn = document.querySelector(".chat-input-row button");
             btn.classList.add("loading");
 
-            setTimeout(() => {
-                const reply = generateSmartAIReply(input.toLowerCase());
+            try {
+                const reply = await fetchAIReply(input);
                 addChat("ai", reply);
                 conversationContext.push({ user: input, ai: reply });
+            } catch (error) {
+                console.error(error);
+                const fallback = generateSmartAIReply(input.toLowerCase());
+                addChat("ai", `⚠️ AI service unavailable. Using local fallback:\n\n${fallback}`);
+                conversationContext.push({ user: input, ai: fallback });
+            } finally {
                 btn.classList.remove("loading");
-            }, 600);
+                document.getElementById("chatInput").value = "";
+            }
+        }
 
-            document.getElementById("chatInput").value = "";
+        async function fetchAIReply(input) {
+            const response = await fetch("/api/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: input,
+                    history: conversationContext
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`AI server error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.reply || "Sorry, I could not get a response from the AI server.";
         }
 
         function addChat(type, text) {
