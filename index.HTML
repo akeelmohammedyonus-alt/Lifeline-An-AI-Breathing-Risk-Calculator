@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeLine 2.0 – AI Breathing Risk Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a2a4e 50%, #0d1b35 100%);
+            color: #E3F2FD;
+            text-align: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .top-bar {
+            background: linear-gradient(90deg, rgba(2, 136, 209, 0.3), rgba(56, 142, 60, 0.3));
+            padding: 15px;
+            font-size: 14px;
+            border-bottom: 2px solid rgba(76, 175, 80, 0.3);
+            backdrop-filter: blur(10px);
+            margin-bottom: 20px;
+            border-radius: 12px;
+            margin: 0 auto 20px;
+            max-width: 1200px;
+        }
+
+        h1 {
+            margin-top: 10px;
+            font-size: 48px;
+            background: linear-gradient(135deg, #4CAF50, #2196F3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        h3 {
+            margin-top: 8px;
+            color: #81C784;
+            font-weight: 300;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 24px;
+            margin-top: 30px;
+        }
+
+        .card {
+            background: rgba(15, 20, 25, 0.8);
+            border: 1px solid rgba(76, 175, 80, 0.2);
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            text-align: left;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(76, 175, 80, 0.4);
+            box-shadow: 0 12px 48px rgba(76, 175, 80, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .card-title {
+            font-size: 20px;
+            margin-bottom: 16px;
+            font-weight: 700;
+            color: #4CAF50;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #B3E5FC;
+            display: block;
+            margin-top: 12px;
+            margin-bottom: 6px;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        input[type="range"] {
+            width: 100%;
+            padding: 12px;
+            margin-top: 4px;
+            border-radius: 10px;
+            border: 1.5px solid rgba(76, 175, 80, 0.3);
+            background: rgba(5, 15, 25, 0.9);
+            color: #E3F2FD;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 12px rgba(76, 175, 80, 0.3);
+            background: rgba(5, 15, 25, 1);
+        }
+
+        input[type="range"] {
+            padding: 0;
+            height: 6px;
+            cursor: pointer;
+        }
+
+        .range-value {
+            font-size: 12px;
+            color: #81C784;
+            margin-top: 2px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            margin-top: 16px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #45a049, #3d8b40);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary.loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .btn-secondary {
+            background: rgba(76, 175, 80, 0.2);
+            color: #81C784;
+            padding: 8px 16px;
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(76, 175, 80, 0.3);
+        }
+
+        #result {
+            margin-top: 16px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #4CAF50;
+            padding: 12px;
+            border-left: 4px solid #4CAF50;
+            border-radius: 8px;
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        #emojiResult {
+            font-size: 32px;
+            margin-top: 8px;
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .advice-box {
+            margin-top: 12px;
+            padding: 12px;
+            border-left: 4px solid #2196F3;
+            border-radius: 8px;
+            background: rgba(33, 150, 243, 0.1);
+            font-size: 13px;
+            color: #B3E5FC;
+            line-height: 1.5;
+        }
+
+        .chat-box {
+            width: 100%;
+            height: 240px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 12px;
+            overflow-y: auto;
+            font-size: 13px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+
+        .chat-msg {
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            line-height: 1.4;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-msg.user {
+            background: rgba(76, 175, 80, 0.2);
+            color: #81C784;
+            text-align: right;
+            border-left: 3px solid transparent;
+            border-right: 3px solid #4CAF50;
+        }
+
+        .chat-msg.ai {
+            background: rgba(33, 150, 243, 0.1);
+            color: #81C784;
+            border-left: 3px solid #2196F3;
+        }
+
+        .chat-input-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .chat-input-row input {
+            flex: 1;
+        }
+
+        .chat-input-row button {
+            flex: 0 0 80px;
+            padding: 12px;
+            margin: 0;
+        }
+
+        #graphCanvas {
+            width: 100%;
+            height: 220px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+
+        table {
+            width: 100%;
+            margin-top: 12px;
+            font-size: 13px;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: rgba(76, 175, 80, 0.1);
+            padding: 10px;
+            border-bottom: 2px solid rgba(76, 175, 80, 0.3);
+            font-weight: 600;
+            color: #4CAF50;
+        }
+
+        td {
+            padding: 8px;
+            border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+        }
+
+        tr:hover {
+            background: rgba(76, 175, 80, 0.05);
+        }
+
+        .tips-section {
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #FFC107;
+            border-radius: 8px;
+        }
+
+        .tips-section h4 {
+            color: #FFC107;
+            font-size: 13px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .tips-section ul {
+            list-style: none;
+            font-size: 12px;
+            color: #FFD54F;
+        }
+
+        .tips-section li {
+            margin: 4px 0;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .tips-section li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+        }
+
+        .error {
+            color: #FF6B6B;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 36px;
+            }
+
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="top-bar">✨ LifeLine 2.0 • AI-Powered Breathing Risk Assistant ✨</div>
+
+    <div class="container">
+        <h1>LifeLine</h1>
+        <h3>Smart Breathing Risk Assessment & AI Advisor</h3>
+
+        <div class="layout">
+
+            <!-- INPUT CARD -->
+            <div class="card">
+                <div class="card-title">🫁 Risk Assessment</div>
+
+                <label>Temperature (°C)</label>
+                <input id="temp" type="number" placeholder="5 - 35" min="0" max="50">
+
+                <label>Humidity (%)</label>
+                <input id="humidity" type="number" placeholder="0 - 100" min="0" max="100">
+
+                <label>Air Quality</label>
+                <input id="airq" type="range" min="1" max="5" value="3">
+                <div class="range-value">Good <span id="airqValue">3</span> Bad</div>
+
+                <label>Activity Level</label>
+                <input id="activity" type="range" min="1" max="5" value="2">
+                <div class="range-value">Low <span id="activityValue">2</span> High</div>
+
+                <label>Stress Level</label>
+                <input id="stress" type="range" min="1" max="5" value="2">
+                <div class="range-value">Low <span id="stressValue">2</span> High</div>
+
+                <button class="btn-primary" onclick="calculateRisk()">Analyze Risk</button>
+
+                <div id="result"></div>
+                <div id="emojiResult"></div>
+                <div id="advice" class="advice-box" style="display:none;"></div>
+                <button class="btn-secondary" onclick="clearAllData()">Clear Data</button>
+            </div>
+
+            <!-- GRAPH + HISTORY -->
+            <div class="card">
+                <div class="card-title">📊 Risk Trends</div>
+                <canvas id="graphCanvas"></canvas>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Score</th>
+                            <th>Level</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTable"></tbody>
+                </table>
+            </div>
+
+            <!-- MINI AI CHAT -->
+            <div class="card">
+                <div class="card-title">🤖 Smart AI Assistant</div>
+
+                <div class="chat-box" id="chatBox"></div>
+
+                <div class="chat-input-row">
+                    <input id="chatInput" type="text" placeholder="Ask about risks, tips, or breathing...">
+                    <button class="btn-primary" onclick="handleChat()">Send</button>
+                </div>
+
+                <div id="tips" class="tips-section" style="display:none;">
+                    <h4>💡 Health Tips</h4>
+                    <ul id="tipsList"></ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let riskHistory = [];
+        let lastRisk = 0;
+        let conversationContext = [];
+        let userProfile = {
+            triggers: [],
+            preferences: {},
+            riskPatterns: [],
+            conversationCount: 0,
+            lastAssessment: null
+        };
+
+        // Advanced AI State Management
+        const aiMemory = {
+            conversationHistory: [],
+            learnedTriggers: [],
+            riskTrends: { improving: false, worsening: false },
+            userGoals: [],
+            suggestedActions: []
+        };
+
+        // Update range display values
+        document.getElementById("airq").addEventListener("input", (e) => {
+            document.getElementById("airqValue").textContent = e.target.value;
+        });
+        document.getElementById("activity").addEventListener("input", (e) => {
+            document.getElementById("activityValue").textContent = e.target.value;
+        });
+        document.getElementById("stress").addEventListener("input", (e) => {
+            document.getElementById("stressValue").textContent = e.target.value;
+        });
+
+        // Load data from localStorage
+        function loadData() {
+            const saved = localStorage.getItem("lifelineRiskHistory");
+            const savedProfile = localStorage.getItem("lifelineUserProfile");
+            if (saved) {
+                riskHistory = JSON.parse(saved);
+                if (riskHistory.length > 0) {
+                    drawGraph();
+                    updateHistory(riskHistory[riskHistory.length - 1], getRiskLevel(riskHistory[riskHistory.length - 1]));
+                }
+            }
+            if (savedProfile) {
+                userProfile = JSON.parse(savedProfile);
+            }
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem("lifelineRiskHistory", JSON.stringify(riskHistory));
+            localStorage.setItem("lifelineUserProfile", JSON.stringify(userProfile));
+        }
+
+        // Analyze risk trends over time
+        function analyzeRiskTrends() {
+            if (riskHistory.length < 2) return null;
+
+            const recent = riskHistory.slice(-5);
+            const average = recent.reduce((a, b) => a + b) / recent.length;
+            const previous = riskHistory.slice(-10, -5);
+            const prevAverage = previous.length > 0 ? previous.reduce((a, b) => a + b) / previous.length : average;
+
+            return {
+                trend: average > prevAverage ? "worsening" : "improving",
+                changePercent: Math.round(((average - prevAverage) / prevAverage) * 100),
+                stability: recent.every((r, i, arr) => i === 0 || Math.abs(r - arr[i - 1]) < 1) ? "stable" : "fluctuating"
+            };
+        }
+
+        // Get risk level from score
+        function getRiskLevel(risk) {
+            if (risk > 5) return "HIGH";
+            if (risk > 2) return "MEDIUM";
+            return "LOW";
+        }
+
+        // Get emoji for risk level
+        function getRiskEmoji(risk) {
+            if (risk > 5) return "🔴 CRITICAL";
+            if (risk > 2) return "🟠 ELEVATED";
+            return "🟢 SAFE";
+        }
+
+        // Get personalized advice
+        function getPersonalizedAdvice(temp, humidity, airq, activity, stress) {
+            let tips = [];
+
+            if (humidity > 70) tips.push("💧 High humidity detected - consider using a dehumidifier");
+            if (humidity < 30) tips.push("💨 Very dry air - use a humidifier or stay hydrated");
+            if (airq >= 4) tips.push("⚠️ Poor air quality - avoid outdoor activities");
+            if (airq <= 2) tips.push("✅ Good air quality - this is a great time for outdoor activity");
+            if (activity >= 4) tips.push("🏃 High activity level - take breaks and monitor symptoms");
+            if (stress >= 4) tips.push("😌 High stress detected - try relaxation techniques");
+            if (temp < 10) tips.push("❄️ Cold air can constrict airways - keep warm");
+            if (temp > 30) tips.push("🌡️ Heat increases breathing difficulty - stay hydrated");
+
+            return tips.length > 0 ? tips : ["✨ Conditions look favorable - stay active and healthy!"];
+        }
+
+        // Validate inputs
+        function validateInputs(temp, humidity, airq, activity, stress) {
+            const errors = [];
+
+            if (temp === "" || isNaN(temp)) errors.push("Enter temperature");
+            if (humidity === "" || isNaN(humidity)) errors.push("Enter humidity");
+
+            return errors;
+        }
+
+        // Calculate Risk
+        function calculateRisk() {
+            const tempVal = Number(document.getElementById("temp").value);
+            const humidityVal = Number(document.getElementById("humidity").value);
+            const airqVal = Number(document.getElementById("airq").value);
+            const activityVal = Number(document.getElementById("activity").value);
+            const stressVal = Number(document.getElementById("stress").value);
+
+            // Validate required fields
+            const errors = validateInputs(document.getElementById("temp").value,
+                document.getElementById("humidity").value);
+            if (errors.length > 0) {
+                document.getElementById("result").innerHTML = `<span class="error">⚠️ ${errors.join(", ")}</span>`;
+                return;
+            }
+
+            let risk = 0;
+
+            // More sophisticated risk calculation
+            if (humidityVal > 70) risk += 2;
+            if (humidityVal < 30) risk += 1;
+            if (airqVal >= 4) risk += 3;
+            if (activityVal >= 4) risk += 2;
+            if (stressVal >= 4) risk += 1.5;
+            if (tempVal < 10) risk += 1.5;
+            if (tempVal > 28) risk += 1;
+
+            // Compound factors
+            if (activityVal >= 4 && airqVal >= 4) risk += 1.5;
+            if (stressVal >= 4 && humidityVal > 70) risk += 1;
+
+            risk = Math.round(risk * 10) / 10;
+            lastRisk = risk;
+
+            let level = getRiskLevel(risk);
+            let emoji = getRiskEmoji(risk);
+
+            document.getElementById("result").innerHTML = `Risk Level: <strong>${level}</strong> (Score: ${risk}/10)`;
+            document.getElementById("emojiResult").textContent = emoji;
+
+            // Show personalized advice
+            const tips = getPersonalizedAdvice(tempVal, humidityVal, airqVal, activityVal, stressVal);
+            const adviceBox = document.getElementById("advice");
+            adviceBox.innerHTML = `<strong>📋 Recommendation:</strong> ${tips[0]}`;
+            adviceBox.style.display = "block";
+
+            // Show health tips
+            const tipsSection = document.getElementById("tips");
+            const tipsList = document.getElementById("tipsList");
+            tipsList.innerHTML = tips.map(tip => `<li>${tip}</li>`).join("");
+            tipsSection.style.display = "block";
+
+            updateHistory(risk, level);
+            drawGraph();
+            saveData();
+
+            // Trigger AI response
+            setTimeout(() => {
+                const aiResponse = generateContextAwareReply(tempVal, humidityVal, airqVal, activityVal, stressVal, risk);
+                addChat("ai", aiResponse);
+            }, 500);
+        }
+
+        // Update History Table
+        function updateHistory(risk, level) {
+            riskHistory.push(risk);
+            if (riskHistory.length > 20) riskHistory.shift();
+
+            const table = document.getElementById("historyTable");
+            table.innerHTML = "";
+
+            riskHistory.forEach((r, i) => {
+                const lvl = getRiskLevel(r);
+                const now = new Date();
+                const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+                table.innerHTML += `<tr><td>${i + 1}</td><td>${r}</td><td>${lvl}</td><td>${time}</td></tr>`;
+            });
+        }
+
+        // Draw Risk Graph
+        function drawGraph() {
+            const canvas = document.getElementById("graphCanvas");
+            const ctx = canvas.getContext("2d");
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            if (riskHistory.length === 0) return;
+
+            const maxRisk = 10;
+            const barWidth = Math.max(w / (riskHistory.length * 2.5), 20);
+            const gap = barWidth * 0.5;
+
+            // Draw grid lines
+            ctx.strokeStyle = "rgba(76, 175, 80, 0.1)";
+            ctx.lineWidth = 1;
+            for (let i = 1; i <= 5; i++) {
+                const y = h - (h * i / 5);
+                ctx.beginPath();
+                ctx.moveTo(20, y);
+                ctx.lineTo(w - 20, y);
+                ctx.stroke();
+            }
+
+            // Draw bars
+            riskHistory.forEach((risk, i) => {
+                const x = 30 + i * (barWidth + gap);
+                const height = (risk / maxRisk) * (h - 40);
+                const y = h - height - 20;
+
+                let color = "#4CAF50";
+                if (risk > 2) color = "#FF9800";
+                if (risk > 5) color = "#F44336";
+
+                // Gradient fill
+                const gradient = ctx.createLinearGradient(x, y, x, h);
+                gradient.addColorStop(0, color);
+                gradient.addColorStop(1, color + "40");
+
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x, y, barWidth, height);
+
+                // Border
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, barWidth, height);
+
+                // Value text
+                ctx.fillStyle = "#E3F2FD";
+                ctx.font = "11px Segoe UI";
+                ctx.fillText(risk.toFixed(1), x + barWidth / 2 - 10, y - 5);
+            });
+        }
+
+        // Enhanced AI Chat with Context Awareness
+        function handleChat() {
+            const input = document.getElementById("chatInput").value.trim();
+            if (!input) return;
+
+            addChat("user", input);
+
+            const btn = document.querySelector(".chat-input-row button");
+            btn.classList.add("loading");
+
+            setTimeout(() => {
+                const reply = generateSmartAIReply(input.toLowerCase());
+                addChat("ai", reply);
+                conversationContext.push({ user: input, ai: reply });
+                btn.classList.remove("loading");
+            }, 600);
+
+            document.getElementById("chatInput").value = "";
+        }
+
+        function addChat(type, text) {
+            const box = document.getElementById("chatBox");
+            const msg = document.createElement("div");
+            msg.className = `chat-msg ${type}`;
+            msg.innerHTML = `<b>${type === "user" ? "You" : "LifeLine AI"}:</b> ${text}`;
+            box.appendChild(msg);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        // Generate context-aware response after risk calculation
+        function generateContextAwareReply(temp, humidity, airq, activity, stress, risk) {
+            userProfile.lastAssessment = {
+                temp, humidity, airq, activity, stress, risk,
+                timestamp: new Date()
+            };
+
+            let response = "";
+            const trends = analyzeRiskTrends();
+
+            // Determine primary risk factor
+            let primaryFactor = "multiple factors";
+            let maxContribution = 0;
+            const factors = { humidity, airq, activity, stress, temp };
+
+            if (humidity > 70 || humidity < 30) primaryFactor = "humidity";
+            if (airq >= 4) primaryFactor = "air quality";
+            if (activity >= 4) primaryFactor = "activity level";
+            if (stress >= 4) primaryFactor = "stress level";
+            if (temp < 10 || temp > 28) primaryFactor = "temperature";
+
+            // Store trend in profile
+            if (trends) {
+                userProfile.riskPatterns.push({
+                    risk: risk,
+                    trend: trends.trend,
+                    timestamp: new Date()
+                });
+            }
+
+            if (risk > 5) {
+                response = `🔴 CRITICAL RISK ALERT\n\n`;
+                response += `Your breathing risk is HIGH (${risk}/10). Primary concern: ${primaryFactor}\n\n`;
+                response += `⚡ Immediate recommendations:\n`;
+
+                if (airq >= 4) {
+                    response += `• AVOID outdoor activities - poor air quality detected\n`;
+                    response += `• Stay indoors with air purifier if possible\n`;
+                }
+                if (activity >= 4) {
+                    response += `• REDUCE activity level significantly\n`;
+                    response += `• Take frequent breaks if exercising\n`;
+                }
+                if (stress >= 4) {
+                    response += `• Practice stress-relief techniques NOW\n`;
+                    response += `• Try 10 minutes of deep breathing\n`;
+                }
+                if (humidity > 70) {
+                    response += `• Turn on dehumidifier\n`;
+                    response += `• Improve ventilation\n`;
+                }
+                if (temp < 10) {
+                    response += `• Avoid cold air exposure\n`;
+                    response += `• Breathe through your nose to warm air\n`;
+                }
+                response += `\n💊 Consult a doctor if symptoms worsen!`;
+            }
+            else if (risk > 2) {
+                response = `🟠 ELEVATED RISK DETECTED\n\n`;
+                response += `Your breathing risk is MEDIUM (${risk}/10). Key issue: ${primaryFactor}\n\n`;
+                response += `⚠️ Recommended actions:\n`;
+
+                if (humidity > 70) response += `• Use dehumidifier (high humidity limits airflow)\n`;
+                if (humidity < 30) response += `• Use humidifier (very dry air irritates lungs)\n`;
+                if (airq >= 4) response += `• Limit outdoor time during poor air quality\n`;
+                if (activity >= 4) response += `• Pace your activity - take regular breaks\n`;
+                if (stress >= 4) response += `• Practice relaxation techniques\n`;
+                if (temp < 10) response += `• Bundle up and avoid extreme cold\n`;
+
+                response += `\n✅ Monitor conditions and adjust as needed`;
+
+                if (trends && trends.trend === "worsening") {
+                    response += `\n⚠️ Note: Your risk has been getting worse recently.`;
+                }
+            }
+            else {
+                response = `🟢 LOW RISK - SAFE CONDITIONS\n\n`;
+                response += `Your breathing risk is LOW (${risk}/10). Great job! ✨\n\n`;
+                response += `💚 Current conditions are favorable:\n`;
+                response += `• Temperature is in the safe range\n`;
+                response += `• Humidity levels are good\n`;
+                response += `• Activity and stress are manageable\n`;
+                response += `• Air quality is acceptable\n\n`;
+
+                if (trends && trends.trend === "improving") {
+                    response += `📈 Excellent! Your risk has been improving!\n`;
+                    response += `Keep maintaining these healthy conditions.\n`;
+                } else {
+                    response += `👍 This is a great time for outdoor activities!\n`;
+                }
+
+                response += `💡 Continue monitoring to stay safe!`;
+            }
+
+            saveData();
+            return response;
+        }
+
+        // Advanced Intent Recognition Engine
+        class AIIntentDetector {
+            constructor() {
+                this.intents = {
+                    "breathing": {
+                        keywords: ["breathing", "breathe", "shortness", "breathless", "dyspnea", "lung", "respir"],
+                        subtypes: {
+                            "exercise": ["exercise", "workout", "run", "jog", "sport", "activity", "train"],
+                            "difficulty": ["hard", "difficult", "struggle", "can't", "unable", "short"],
+                            "trigger": ["trigger", "cause", "induced", "when", "during"]
+                        }
+                    },
+                    "humidity": {
+                        keywords: ["humidity", "humid", "dry", "moisture", "dampness", "air moisture"],
+                        subtypes: {
+                            "high": ["high", "too much", "excessive", "sticky", "thick"],
+                            "low": ["low", "dry", "parched", "desert"]
+                        }
+                    },
+                    "air_quality": {
+                        keywords: ["air quality", "pollution", "pollut", "smog", "pollen", "allergen", "dust", "indoor air"],
+                        subtypes: {
+                            "outdoor": ["outside", "outdoor", "environment", "weather"],
+                            "indoor": ["inside", "indoor", "home", "room", "office"]
+                        }
+                    },
+                    "stress": {
+                        keywords: ["stress", "anxious", "anxiety", "nervous", "worry", "panic", "tension", "overwhelm"],
+                        subtypes: {
+                            "level": ["level", "much", "how much", "measure"],
+                            "management": ["help", "manage", "reduce", "control", "cope"]
+                        }
+                    },
+                    "temperature": {
+                        keywords: ["temperature", "cold", "hot", "warm", "heat", "chill", "freeze", "cool"],
+                        subtypes: {
+                            "cold": ["cold", "cool", "chill", "freeze", "winter"],
+                            "hot": ["hot", "warm", "heat", "summer", "warm"]
+                        }
+                    },
+                    "asthma": {
+                        keywords: ["asthma", "asthmatic", "wheeze", "inhaler", "rescue", "medication"],
+                        subtypes: {
+                            "triggers": ["trigger", "what cause", "activated"],
+                            "management": ["control", "manage", "treat", "help"]
+                        }
+                    },
+                    "exercise": {
+                        keywords: ["exercise", "workout", "run", "walk", "gym", "sport", "activity", "physical"],
+                        subtypes: {
+                            "intensity": ["intense", "hard", "easy", "light", "vigorous"],
+                            "timing": ["when", "best time", "before", "after"]
+                        }
+                    },
+                    "tips": {
+                        keywords: ["tip", "advice", "help", "suggest", "recommend", "how to", "what should", "what can"],
+                        subtypes: {
+                            "prevention": ["prevent", "avoid", "stop", "prevent"],
+                            "improvement": ["improve", "better", "enhance", "increase"]
+                        }
+                    },
+                    "risk": {
+                        keywords: ["risk", "score", "level", "danger", "safe", "concern"],
+                        subtypes: {
+                            "current": ["now", "current", "today", "right now"],
+                            "trend": ["trend", "change", "improve", "worse", "better"]
+                        }
+                    },
+                    "history": {
+                        keywords: ["history", "past", "before", "previous", "trend", "pattern", "average"]
+                    }
+                };
+            }
+
+            detectIntent(userQuery) {
+                userQuery = userQuery.toLowerCase();
+                const detectedIntents = [];
+
+                for (let [intentName, intentData] of Object.entries(this.intents)) {
+                    for (let keyword of intentData.keywords) {
+                        if (userQuery.includes(keyword)) {
+                            let subtype = null;
+                            if (intentData.subtypes) {
+                                for (let [subName, subKeywords] of Object.entries(intentData.subtypes)) {
+                                    if (subKeywords.some(k => userQuery.includes(k))) {
+                                        subtype = subName;
+                                        break;
+                                    }
+                                }
+                            }
+                            detectedIntents.push({ intent: intentName, subtype: subtype, confidence: 0.95 });
+                            break;
+                        }
+                    }
+                }
+
+                return detectedIntents.length > 0 ? detectedIntents : [{ intent: "general", subtype: null, confidence: 0.5 }];
+            }
+        }
+
+        const intentDetector = new AIIntentDetector();
+
+        // Advanced AI Response Engine with Context Awareness
+        function generateSmartAIReply(userQuery) {
+            userProfile.conversationCount++;
+
+            const detectedIntents = intentDetector.detectIntent(userQuery);
+            const primaryIntent = detectedIntents[0];
+            const trends = analyzeRiskTrends();
+
+            let response = "";
+
+            // Intent-based response generation with advanced logic
+            if (primaryIntent.intent === "breathing") {
+                if (primaryIntent.subtype === "exercise") {
+                    response = `🏃 Exercise-induced breathing issues are common. Key strategies:\n`;
+                    response += `• Warm up for 10-15 minutes first\n`;
+                    response += `• Avoid exercise when air quality is poor\n`;
+                    response += `• Avoid cold or very dry air during activity\n`;
+                    if (lastRisk > 2) response += `• Your current risk is elevated - lower intensity today\n`;
+                    response += `• Stay hydrated before, during, and after exercise`;
+                } else if (primaryIntent.subtype === "difficulty") {
+                    response = `⚠️ Breathing difficulty needs attention. Let's identify triggers:\n`;
+                    response += `• Is it happening during activity, at rest, or both?\n`;
+                    response += `• Notice any connection to humidity, temperature, or air quality?\n`;
+                    response += `• Have you used a rescue inhaler recently?\n`;
+                    response += `Keep monitoring your conditions and contact a doctor if symptoms worsen.`;
+                } else {
+                    response = `🫁 Breathing is affected by 5 key factors:\n`;
+                    response += `1. Temperature (15-25°C is ideal)\n`;
+                    response += `2. Humidity (40-60% is optimal)\n`;
+                    response += `3. Air Quality (avoid pollution/pollen)\n`;
+                    response += `4. Activity Level (warm up properly)\n`;
+                    response += `5. Stress (relaxation helps breathing)\n`;
+                    response += `All these together determine your risk level.`;
+                }
+            }
+            else if (primaryIntent.intent === "humidity") {
+                let humidityAdvice = `💧 Humidity Management Guide:\n`;
+                if (primaryIntent.subtype === "high") {
+                    humidityAdvice += `HIGH HUMIDITY (>70%) effects:\n`;
+                    humidityAdvice += `• Air feels thick - harder to breathe\n`;
+                    humidityAdvice += `• Promotes mold and dust mites\n`;
+                    humidityAdvice += `• Solutions: Use dehumidifier, improve ventilation\n`;
+                    humidityAdvice += `• Best times for activity: Early morning or evening`;
+                } else if (primaryIntent.subtype === "low") {
+                    humidityAdvice += `LOW HUMIDITY (<30%) effects:\n`;
+                    humidityAdvice += `• Dries out airways and throat\n`;
+                    humidityAdvice += `• Increases irritation and coughing\n`;
+                    humidityAdvice += `• Solutions: Use humidifier, drink more water\n`;
+                    humidityAdvice += `• Keep environment at 40-60% humidity`;
+                } else {
+                    humidityAdvice += `Ideal humidity: 40-60%\n`;
+                    humidityAdvice += `Current range matters for your breathing\n`;
+                    humidityAdvice += `Check your home humidity with a hygrometer`;
+                }
+                response = humidityAdvice;
+            }
+            else if (primaryIntent.intent === "air_quality") {
+                response = `🌍 Air Quality & Breathing:\n`;
+                if (primaryIntent.subtype === "outdoor") {
+                    response += `OUTDOOR AIR:\n`;
+                    response += `• Check local Air Quality Index (AQI)\n`;
+                    response += `• AQI >100 = reduce outdoor activity\n`;
+                    response += `• Peak pollution: mid-afternoon\n`;
+                    response += `• Best times: Early morning or after rain`;
+                } else if (primaryIntent.subtype === "indoor") {
+                    response += `INDOOR AIR:\n`;
+                    response += `• Use air purifiers with HEPA filters\n`;
+                    response += `• Vacuum regularly (weekly minimum)\n`;
+                    response += `• Avoid strong chemicals/perfumes\n`;
+                    response += `• Open windows when outdoor air is clean`;
+                } else {
+                    response += `Common irritants: Dust, pollen, pets, mold\n`;
+                    response += `Control triggers at home first\n`;
+                    response += `Then manage outdoor exposures`;
+                }
+            }
+            else if (primaryIntent.intent === "stress") {
+                response = `😌 Stress & Breathing Connection:\n`;
+                response += `Stress triggers shallow, rapid breathing, which:\n`;
+                response += `• Reduces oxygen intake\n`;
+                response += `• Increases panic and anxiety\n`;
+                response += `• Worsens breathing symptoms\n\n`;
+                response += `🧘 Try these techniques:\n`;
+                response += `• 4-7-8 breathing: Inhale 4s, hold 7s, exhale 8s\n`;
+                response += `• Box breathing: 4s in, 4s hold, 4s out\n`;
+                response += `• Progressive muscle relaxation\n`;
+                response += `• Meditation or yoga daily`;
+            }
+            else if (primaryIntent.intent === "temperature") {
+                response = `🌡️ Temperature Effects:\n`;
+                if (primaryIntent.subtype === "cold") {
+                    response += `COLD AIR (<10°C) effects:\n`;
+                    response += `• Constricts airways\n`;
+                    response += `• Increases mucus production\n`;
+                    response += `• Higher asthma triggers\n`;
+                    response += `• Solution: Breathe through nose, wear scarf\n`;
+                    response += `• Limit outdoor activity in extreme cold`;
+                } else if (primaryIntent.subtype === "hot") {
+                    response += `HOT AIR (>28°C) effects:\n`;
+                    response += `• Dehydrates airways\n`;
+                    response += `• Decreases oxygen availability\n`;
+                    response += `• Increases breathing difficulty\n`;
+                    response += `• Solution: Stay indoors during peak heat\n`;
+                    response += `• Increase fluid intake significantly`;
+                } else {
+                    response += `Ideal temperature: 15-25°C\n`;
+                    response += `Adjust activity based on temperature\n`;
+                    response += `Extreme temps (cold/hot) always raise risk`;
+                }
+            }
+            else if (primaryIntent.intent === "asthma") {
+                response = `🫁 Asthma Management:\n`;
+                response += `Common triggers:\n`;
+                response += `• Cold, dry air (winter)\n`;
+                response += `• Pollution and poor air quality\n`;
+                response += `• Exercise without warm-up\n`;
+                response += `• Allergies (pollen, dust, pets)\n`;
+                response += `• Stress and strong emotions\n\n`;
+                response += `Control strategies:\n`;
+                response += `• Use rescue inhaler as prescribed\n`;
+                response += `• Keep preventative medication handy\n`;
+                response += `• Identify YOUR specific triggers\n`;
+                response += `• Monitor conditions before activity`;
+            }
+            else if (primaryIntent.intent === "exercise") {
+                response = `🏋️ Safe Exercise Guide:\n`;
+                response += `BEFORE exercising:\n`;
+                response += `• Check temperature, humidity, air quality\n`;
+                response += `• Assess your current risk level\n`;
+                response += `• Have rescue inhaler nearby\n\n`;
+                response += `DURING exercise:\n`;
+                response += `• Warm up 10-15 minutes first\n`;
+                response += `• Start slow, increase gradually\n`;
+                response += `• Take breaks if breathing becomes difficult\n\n`;
+                response += `AFTER exercise:\n`;
+                response += `• Cool down gradually\n`;
+                response += `• Monitor for delayed symptoms`;
+            }
+            else if (primaryIntent.intent === "tips") {
+                const allTips = [
+                    "🥤 Stay hydrated - drink 2-3 liters daily for better breathing",
+                    "😴 Sleep 7-9 hours - poor sleep worsens breathing symptoms",
+                    "🧘 Practice deep breathing - 5 minutes daily helps train your lungs",
+                    "🚫 Avoid triggers - keep a log of what makes breathing harder",
+                    "💪 Strengthen lungs - regular cardio improves lung capacity",
+                    "🌿 Use natural remedies - ginger, honey, steam can help",
+                    "⏰ Monitor patterns - notice when your risk is highest",
+                    "🏠 Control environment - maintain ideal temperature and humidity",
+                    "🧪 Check air quality - use AQI apps before going outside",
+                    "👨‍⚕️ See a doctor - persistent symptoms need professional help"
+                ];
+                const randomTips = allTips.sort(() => 0.5 - Math.random()).slice(0, 3);
+                response = `💡 Top Recommendations:\n`;
+                response += randomTips.map((tip, i) => `${i + 1}. ${tip}`).join("\n");
+            }
+            else if (primaryIntent.intent === "risk") {
+                if (primaryIntent.subtype === "trend" && trends) {
+                    response = `📊 Your Risk Trend Analysis:\n`;
+                    response += `Status: ${trends.trend.toUpperCase()}\n`;
+                    response += `Change: ${trends.changePercent > 0 ? "+" : ""}${trends.changePercent}%\n`;
+                    response += `Stability: ${trends.stability}\n\n`;
+                    if (trends.trend === "worsening") {
+                        response += `⚠️ Your risk is worsening. Focus on:\n`;
+                        response += `• Reducing stress\n`;
+                        response += `• Improving air quality at home\n`;
+                        response += `• Avoiding outdoor activity on bad air days\n`;
+                        response += `• Getting medical advice if symptoms persist`;
+                    } else {
+                        response += `✅ Great! Your risk is improving!\n`;
+                        response += `Keep doing what you're doing.\n`;
+                        response += `Continue monitoring conditions.`;
+                    }
+                } else {
+                    response = `📊 Understanding Your Risk Score:\n`;
+                    response += `Score = 0-10 scale based on:\n`;
+                    response += `• Humidity (0-2 points)\n`;
+                    response += `• Air quality (0-3 points)\n`;
+                    response += `• Activity level (0-2 points)\n`;
+                    response += `• Stress (0-1.5 points)\n`;
+                    response += `• Temperature (0-1.5 points)\n`;
+                    response += `• Compound factors (+up to 2.5 points)\n\n`;
+                    if (lastRisk > 5) response += `🔴 Your current score is HIGH`;
+                    else if (lastRisk > 2) response += `🟠 Your current score is MEDIUM`;
+                    else response += `🟢 Your current score is LOW`;
+                }
+            }
+            else if (primaryIntent.intent === "history") {
+                response = `📈 Your Breathing Risk History:\n`;
+                if (riskHistory.length === 0) {
+                    response += `No assessments yet. Start by entering your conditions!`;
+                } else {
+                    const avg = (riskHistory.reduce((a, b) => a + b) / riskHistory.length).toFixed(1);
+                    const min = Math.min(...riskHistory).toFixed(1);
+                    const max = Math.max(...riskHistory).toFixed(1);
+                    response += `Total assessments: ${riskHistory.length}\n`;
+                    response += `Average risk: ${avg}/10\n`;
+                    response += `Range: ${min} - ${max}\n`;
+                    if (trends) {
+                        response += `Trend: ${trends.trend} (${trends.changePercent > 0 ? "+" : ""}${trends.changePercent}%)\n`;
+                    }
+                    response += `\n💡 Use this data to identify patterns!`;
+                }
+            }
+            else {
+                // Fallback response
+                const suggestions = [
+                    "🤔 I can help with humidity, air quality, exercise, stress, temperature, asthma, tips, risk analysis, or your history.",
+                    "💬 Try asking: 'Why is humidity important?' or 'How can I improve my breathing?'",
+                    "❓ Ask about your specific conditions or I can provide general health tips!"
+                ];
+                response = suggestions[Math.floor(Math.random() * suggestions.length)];
+            }
+
+            // Add follow-up suggestion if needed
+            if (lastRisk > 5 && !userQuery.includes("help") && !userQuery.includes("advice")) {
+                response += `\n\n⚠️ Your risk is elevated. Would you like specific recommendations?`;
+            }
+
+            return response;
+        }
+
+        // Clear all data
+        function clearAllData() {
+            if (confirm("Clear all data and start fresh?")) {
+                riskHistory = [];
+                lastRisk = 0;
+                localStorage.removeItem("lifelineRiskHistory");
+                document.getElementById("historyTable").innerHTML = "";
+                document.getElementById("result").innerHTML = "";
+                document.getElementById("emojiResult").innerHTML = "";
+                document.getElementById("advice").style.display = "none";
+                document.getElementById("tips").style.display = "none";
+                drawGraph();
+                addChat("ai", "✨ Data cleared! Ready for fresh assessments.");
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener("load", () => {
+            loadData();
+
+            let greeting = `👋 Welcome to LifeLine AI - Your Intelligent Breathing Health Assistant!\n\n`;
+            greeting += `I'm powered by advanced AI that learns your patterns. I can help with:\n`;
+            greeting += `✓ Breathing risk assessment\n`;
+            greeting += `✓ Understanding humidity, air quality, temperature effects\n`;
+            greeting += `✓ Exercise and activity guidance\n`;
+            greeting += `✓ Stress management techniques\n`;
+            greeting += `✓ Asthma and trigger identification\n`;
+            greeting += `✓ Personalized health recommendations\n`;
+            greeting += `✓ Risk trend analysis\n\n`;
+            greeting += `Start by entering your conditions above, then ask me anything!`;
+
+            addChat("ai", greeting);
+        });
+
+        // Allow Enter key to send chat
+        document.getElementById("chatInput").addEventListener("keypress", (e) => {
+            if (e.key === "Enter") handleChat();
+        });
+    </script>
+
+</body>
+
+</html>
