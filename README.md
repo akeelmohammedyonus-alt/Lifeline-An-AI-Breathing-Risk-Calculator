@@ -24,7 +24,4 @@ Create a .env file with:
 - OPENAI_API_KEY=your_key_here
 - OPENAI_MODEL=gpt-5.4-mini
 
-## Logo
-Place your website logo image at `public/images/logo.png`. Recommended size: around 400×400 (the header will scale it to fit). Supported formats: PNG, JPG, or SVG.
 
-If you prefer a different filename or location, update the `<img src="/images/logo.png">` path in `public/index.html` accordingly.
