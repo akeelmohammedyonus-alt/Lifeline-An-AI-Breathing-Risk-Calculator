@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LifeLine 2.0 – AI Breathing Risk Assistant</title>
+    <link rel="icon" href="/images/image.png" />
     <style>
         * {
             margin: 0;
@@ -23,7 +24,7 @@
 
         .top-bar {
             background: linear-gradient(90deg, rgba(2, 136, 209, 0.3), rgba(56, 142, 60, 0.3));
-            padding: 15px;
+            padding: 12px 18px;
             font-size: 14px;
             border-bottom: 2px solid rgba(76, 175, 80, 0.3);
             backdrop-filter: blur(10px);
@@ -31,6 +32,58 @@
             border-radius: 12px;
             margin: 0 auto 20px;
             max-width: 1200px;
+        }
+
+        .top-bar .header-inner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: flex-start;
+        }
+
+        .site-logo {
+            height: 56px;
+            width: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            background: rgba(255, 255, 255, 0.02);
+            padding: 6px;
+            margin-left: auto;
+            /* visually align to right */
+        }
+
+        .site-title {
+            text-align: left;
+            line-height: 1;
+        }
+
+        .site-title .title-text {
+            font-weight: 700;
+            color: #E3F2FD;
+            font-size: 16px;
+            letter-spacing: 0.8px;
+        }
+
+        .site-title .subtitle {
+            font-size: 12px;
+            color: #B3E5FC;
+            margin-top: 2px;
+        }
+
+        /* Page header with optional logo to the right */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 6px;
+        }
+
+        .page-logo {
+            height: 64px;
+            width: auto;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
         }
 
         h1 {
@@ -388,10 +441,21 @@
 
 <body>
 
-    <div class="top-bar">✨ LifeLine 2.0 • AI-Powered Breathing Risk Assistant ✨</div>
+    <div class="top-bar">
+        <div class="header-inner">
+            <div class="site-title">
+                <div class="title-text">LifeLine 2.0</div>
+                <div class="subtitle">AI-Powered Breathing Risk Assistant</div>
+            </div>
+            <img src="/images/image.png" alt="LifeLine logo" class="site-logo" />
+        </div>
+    </div>
 
     <div class="container">
-        <h1>LifeLine</h1>
+        <div class="page-header">
+            <h1>LifeLine</h1>
+            <img src="/images/image.png" class="page-logo" alt="LifeLine logo" />
+        </div>
         <h3>Smart Breathing Risk Assessment & AI Advisor</h3>
 
         <div class="layout">
