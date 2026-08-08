@@ -38,36 +38,40 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            justify-content: flex-start;
+            justify-content: space-between;
         }
 
         .site-logo {
-            height: 56px;
+            height: 90px;
             width: auto;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
             background: rgba(255, 255, 255, 0.02);
             padding: 6px;
-            margin-left: auto;
-            /* visually align to right */
+            margin-left: 0;
+            align-self: center;
         }
 
         .site-title {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             text-align: left;
-            line-height: 1;
+            line-height: 1.1;
+            min-height: 90px;
         }
 
         .site-title .title-text {
             font-weight: 700;
             color: #E3F2FD;
-            font-size: 16px;
+            font-size: 22px;
             letter-spacing: 0.8px;
         }
 
         .site-title .subtitle {
-            font-size: 12px;
+            font-size: 14px;
             color: #B3E5FC;
-            margin-top: 2px;
+            margin-top: 4px;
         }
 
         /* Page header with optional logo to the right */
