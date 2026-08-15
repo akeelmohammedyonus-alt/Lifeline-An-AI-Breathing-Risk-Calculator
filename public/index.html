@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#07111f" />
     <title>LifeLine 2.0 – AI Breathing Risk Assistant</title>
     <link rel="icon" href="./images/image.png" />
     <style>
@@ -770,12 +771,39 @@
 
         @media (max-width: 760px) {
             body {
-                padding: 14px;
+                padding: 12px;
+                -webkit-text-size-adjust: 100%;
+                text-size-adjust: 100%;
+            }
+
+            .top-bar,
+            .card,
+            .hero,
+            .edu-hero {
+                border-radius: 18px;
             }
 
             .hero {
                 grid-template-columns: 1fr;
-                padding: 18px;
+                padding: 18px 16px;
+            }
+
+            .hero-copy {
+                gap: 10px;
+            }
+
+            h1 {
+                font-size: clamp(2rem, 9vw, 2.7rem);
+                line-height: 1.1;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+            }
+
+            .hero-actions .btn-primary,
+            .hero-actions .btn-secondary {
+                width: 100%;
             }
 
             .insight-row {
@@ -787,12 +815,97 @@
                 align-items: flex-start;
             }
 
+            .site-logo {
+                height: 58px;
+            }
+
+            .gauge-shell {
+                width: 180px;
+                height: 180px;
+            }
+
+            .gauge-value strong {
+                font-size: 1.7rem;
+            }
+
+            .layout {
+                gap: 14px;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .card-title {
+                font-size: 0.9rem;
+            }
+
             .chat-input-row {
                 flex-direction: column;
             }
 
             .chat-input-row button {
                 width: 100%;
+            }
+
+            .chat-box {
+                height: 260px;
+            }
+
+            .edu-grid,
+            .diagram {
+                grid-template-columns: 1fr;
+            }
+
+            .illness-card ul,
+            .illness-card p,
+            .edu-card p,
+            .edu-card li {
+                font-size: 0.9rem;
+            }
+
+            table,
+            th,
+            td {
+                font-size: 0.77rem;
+            }
+        }
+
+        @media (max-width: 420px) {
+            body {
+                padding: 10px;
+            }
+
+            .top-bar {
+                padding: 12px 14px;
+            }
+
+            .title-text {
+                font-size: 1rem;
+            }
+
+            .subtitle {
+                font-size: 0.8rem;
+            }
+
+            .mini-stat {
+                padding: 12px 10px;
+            }
+
+            .mini-stat strong {
+                font-size: 0.96rem;
+            }
+
+            .status-card {
+                min-height: 72px;
+            }
+
+            #result {
+                font-size: 0.93rem;
+            }
+
+            .chat-msg {
+                font-size: 0.86rem;
             }
         }
     </style>
@@ -1140,15 +1253,32 @@
         function getBandMeta(risk) { const band = getRiskBand(risk); const map = { safe: { label: 'Comfortable range', summary: 'Conditions look balanced and breathing should feel manageable.', emoji: '💚', color: '#4caf50' }, elevated: { label: 'Watch closely', summary: 'A few factors are pushing the environment toward a less comfortable range.', emoji: '🟡', color: '#ffb300' }, critical: { label: 'High concern', summary: 'Several conditions are combining to create a more demanding breathing environment.', emoji: '🔴', color: '#ff5b5b' } }; return map[band]; }
         function getPersonalizedAdvice(inputs) { const tips = []; const { temp, humidity, airq, activity, stress } = inputs; if (humidity > 70) tips.push('Use a dehumidifier and improve airflow indoors.'); if (humidity < 30) tips.push('Add a humidifier or drink more water to ease dry airways.'); if (airq >= 4) tips.push('Avoid prolonged outdoor exposure until air quality improves.'); if (activity >= 4) tips.push('Take breaks and pace your movement to reduce strain.'); if (stress >= 4) tips.push('Try slow breathing and a short reset before continuing.'); if (temp < 10) tips.push('Keep warm and avoid sudden bursts of cold air.'); if (temp > 28) tips.push('Stay hydrated and reduce exertion during peak heat.'); if (tips.length === 0) tips.push('Conditions look favorable — keep your routine balanced and steady.'); return tips; }
 
+        function getTrendSummary() {
+            if (state.riskHistory.length < 2) {
+                return { label: 'Stable', detail: 'Not enough data yet', tone: 'neutral' };
+            }
+
+            const lastValues = state.riskHistory.slice(-5);
+            const start = lastValues[0];
+            const end = lastValues[lastValues.length - 1];
+            const delta = end - start;
+
+            if (delta >= 1.5) return { label: 'Rising', detail: 'Risk is increasing over recent checks', tone: 'warning' };
+            if (delta <= -1.5) return { label: 'Improving', detail: 'Risk is easing over recent checks', tone: 'safe' };
+            return { label: 'Stable', detail: 'Risk is holding steady', tone: 'neutral' };
+        }
+
         function updateLivePreview(forcedRisk = null) {
             const inputData = readInputs(); const risk = forcedRisk ?? calculateRiskScore(inputData); const meta = getBandMeta(risk);
-            refs.gaugeScore.textContent = risk.toFixed(1); refs.gaugeLabel.textContent = meta.label; refs.gaugeSummary.textContent = meta.summary; refs.gaugeProgress.style.stroke = meta.color; refs.gaugeProgress.style.strokeDashoffset = `${283 - (risk / 10) * 283}`; refs.miniStatus.textContent = meta.label; refs.miniTime.textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); const trend = analyzeRiskTrends(); refs.miniTrend.textContent = trend ? trend.trend : 'Stable'; refs.emojiResult.textContent = meta.emoji;
+            refs.gaugeScore.textContent = risk.toFixed(1); refs.gaugeLabel.textContent = meta.label; refs.gaugeSummary.textContent = meta.summary; refs.gaugeProgress.style.stroke = meta.color; refs.gaugeProgress.style.strokeDashoffset = `${283 - (risk / 10) * 283}`; refs.miniStatus.textContent = meta.label; refs.miniTime.textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            const trend = getTrendSummary(); refs.miniTrend.textContent = trend.label; refs.miniTrend.title = trend.detail; refs.emojiResult.textContent = meta.emoji;
         }
 
         function calculateRisk() {
             const inputs = readInputs(); const errors = validateInputs(inputs); if (errors.length) { refs.result.innerHTML = `<span class="error">⚠️ ${errors.join(', ')}</span>`; return; }
             const risk = calculateRiskScore(inputs); state.lastRisk = risk; const band = getBandMeta(risk);
-            refs.result.innerHTML = `<strong>${band.label}</strong><br>Score: ${risk.toFixed(1)}/10`; refs.emojiResult.textContent = band.emoji; refs.gaugeScore.textContent = risk.toFixed(1); refs.gaugeLabel.textContent = band.label; refs.gaugeSummary.textContent = band.summary; refs.gaugeProgress.style.stroke = band.color; refs.gaugeProgress.style.strokeDashoffset = `${283 - (risk / 10) * 283}`; refs.miniStatus.textContent = band.label; refs.miniTrend.textContent = analyzeRiskTrends()?.trend || 'Stable'; refs.miniTime.textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            refs.result.innerHTML = `<strong>${band.label}</strong><br>Score: ${risk.toFixed(1)}/10`; refs.emojiResult.textContent = band.emoji; refs.gaugeScore.textContent = risk.toFixed(1); refs.gaugeLabel.textContent = band.label; refs.gaugeSummary.textContent = band.summary; refs.gaugeProgress.style.stroke = band.color; refs.gaugeProgress.style.strokeDashoffset = `${283 - (risk / 10) * 283}`; refs.miniStatus.textContent = band.label; refs.miniTime.textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            const trend = getTrendSummary(); refs.miniTrend.textContent = trend.label; refs.miniTrend.title = trend.detail;
             const tips = getPersonalizedAdvice(inputs); refs.advice.innerHTML = `<strong>Recommendation:</strong> ${tips[0]}`; refs.advice.style.display = 'block'; refs.tipsList.innerHTML = tips.map((tip) => `<li>${tip}</li>`).join(''); refs.tips.style.display = 'block';
             addRiskHistory(risk); updateHistoryTable(); drawGraph(); saveData();
             setTimeout(() => { addChat('ai', generateContextAwareReply(inputs, risk)); }, 450);
@@ -1156,8 +1286,92 @@
 
         function addRiskHistory(risk) { state.riskHistory.push(risk); if (state.riskHistory.length > 14) state.riskHistory.shift(); }
         function updateHistoryTable() { refs.historyTable.innerHTML = ''; state.riskHistory.forEach((risk, index) => { const band = getRiskBand(risk); const time = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); refs.historyTable.innerHTML += `<tr><td>${index + 1}</td><td>${risk.toFixed(1)}</td><td>${band.toUpperCase()}</td><td>${time}</td></tr>`; }); }
-        function drawGraph() { const canvas = refs.graphCanvas; if (!canvas) return; const ctx = canvas.getContext('2d'); if (!ctx) return; const ratio = window.devicePixelRatio || 1; const width = canvas.clientWidth; const height = canvas.clientHeight; canvas.width = width * ratio; canvas.height = height * ratio; ctx.setTransform(ratio, 0, 0, ratio, 0, 0); ctx.clearRect(0, 0, width, height); if (!state.riskHistory.length) { ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '14px Inter'; ctx.fillText('No assessments yet', 16, 28); return; } const maxRisk = 10; const chartHeight = height - 40; const chartWidth = width - 36; const gap = Math.max(20, chartWidth / (state.riskHistory.length * 1.4)); const barWidth = Math.max(18, gap * 0.65); ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1; for (let i = 0; i <= 4; i++) { const y = 20 + (chartHeight / 4) * i; ctx.beginPath(); ctx.moveTo(14, y); ctx.lineTo(width - 18, y); ctx.stroke(); } state.riskHistory.forEach((risk, index) => { const x = 18 + index * gap; const rHeight = (risk / maxRisk) * (chartHeight - 6); const y = height - 20 - rHeight; let color = '#4caf50'; if (risk >= 4.5) color = '#ffb300'; if (risk >= 7.5) color = '#ff5b5b'; const gradient = ctx.createLinearGradient(0, y, 0, height - 20); gradient.addColorStop(0, color); gradient.addColorStop(1, `${color}55`); ctx.fillStyle = gradient; ctx.fillRect(x, y, barWidth, rHeight); ctx.fillStyle = '#e7f7ff'; ctx.font = '11px Inter'; ctx.fillText(risk.toFixed(1), x, y - 6); }); }
-        function analyzeRiskTrends() { if (state.riskHistory.length < 2) return null; const recent = state.riskHistory.slice(-4); const previous = state.riskHistory.slice(-8, -4); const recentAvg = recent.reduce((sum, value) => sum + value, 0) / recent.length; const prevAvg = previous.length ? previous.reduce((sum, value) => sum + value, 0) / previous.length : recentAvg; const changePercent = Math.round(((recentAvg - prevAvg) / (prevAvg || 1)) * 100); return { trend: recentAvg > prevAvg ? 'worsening' : 'improving', changePercent, stability: recent.every((value, index) => index === 0 || Math.abs(value - recent[index - 1]) < 1) ? 'stable' : 'fluctuating' }; }
+        function drawGraph() {
+            const canvas = refs.graphCanvas; if (!canvas) return; const ctx = canvas.getContext('2d'); if (!ctx) return;
+            const ratio = window.devicePixelRatio || 1;
+            const width = canvas.clientWidth || 300;
+            const height = canvas.clientHeight || 220;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            ctx.clearRect(0, 0, width, height);
+
+            if (!state.riskHistory.length) {
+                ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                ctx.font = '14px Inter';
+                ctx.fillText('No assessments yet', 16, 28);
+                return;
+            }
+
+            const maxRisk = 10;
+            const padding = { top: 18, right: 16, bottom: 26, left: 28 };
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+
+            ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = padding.top + (chartHeight / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(width - padding.right, y);
+                ctx.stroke();
+            }
+
+            const values = state.riskHistory;
+            const points = values.map((risk, index) => {
+                const x = padding.left + (values.length === 1 ? chartWidth / 2 : (index / (values.length - 1)) * chartWidth);
+                const y = padding.top + chartHeight - (risk / maxRisk) * chartHeight;
+                return { x, y, risk };
+            });
+
+            const latestRisk = values[values.length - 1];
+            const latestBand = getBandMeta(latestRisk);
+            const gradient = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom);
+            gradient.addColorStop(0, `${latestBand.color}CC`);
+            gradient.addColorStop(1, 'rgba(255,255,255,0.02)');
+
+            ctx.beginPath();
+            points.forEach((point, index) => {
+                if (index === 0) {
+                    ctx.moveTo(point.x, point.y);
+                } else {
+                    ctx.lineTo(point.x, point.y);
+                }
+            });
+
+            const lineEndY = padding.top + chartHeight;
+            ctx.lineTo(points[points.length - 1].x, lineEndY);
+            ctx.lineTo(points[0].x, lineEndY);
+            ctx.closePath();
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            ctx.beginPath();
+            points.forEach((point, index) => {
+                if (index === 0) {
+                    ctx.moveTo(point.x, point.y);
+                } else {
+                    ctx.lineTo(point.x, point.y);
+                }
+            });
+            ctx.strokeStyle = latestBand.color;
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            points.forEach((point) => {
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 3.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#f4fbff';
+                ctx.fill();
+                ctx.closePath();
+            });
+
+            ctx.fillStyle = 'rgba(255,255,255,0.75)';
+            ctx.font = '11px Inter';
+            ctx.fillText(`${latestRisk.toFixed(1)}`, points[points.length - 1].x - 10, points[points.length - 1].y - 8);
+        }
+        function analyzeRiskTrends() { if (state.riskHistory.length < 2) return null; const recent = state.riskHistory.slice(-4); const previous = state.riskHistory.slice(-8, -4); const recentAvg = recent.reduce((sum, value) => sum + value, 0) / recent.length; const prevAvg = previous.length ? previous.reduce((sum, value) => sum + value, 0) / previous.length : recentAvg; const changePercent = Math.round(((recentAvg - prevAvg) / (prevAvg || 1)) * 100); return { trend: recentAvg > prevAvg ? 'Rising' : 'Improving', changePercent, stability: recent.every((value, index) => index === 0 || Math.abs(value - recent[index - 1]) < 1) ? 'steady' : 'changing' }; }
         function formatChatText(text) { const escapeHtml = (value) => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); const formatInline = (value) => escapeHtml(value).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>'); const blocks = String(text || '').split(/\n\s*\n/).map((block) => block.trim()).filter(Boolean); return blocks.map((block) => { const lines = block.split(/\n/).map((line) => line.trim()).filter(Boolean); const isList = lines.every((line) => /^([-*•]|\d+\.)\s+/.test(line)); if (isList) { const items = lines.map((line) => { const content = line.replace(/^([-*•]|\d+\.)\s+/, ''); return `<li>${formatInline(content)}</li>`; }); return `<ul>${items.join('')}</ul>`; } return `<p>${lines.map((line) => formatInline(line)).join('<br>')}</p>`; }).join(''); }
         function addChat(type, text) { const message = document.createElement('div'); message.className = `chat-msg ${type}`; message.innerHTML = `<b>${type === 'user' ? 'You' : 'LifeLine AI'}:</b> ${formatChatText(text)}`; refs.chatBox.appendChild(message); refs.chatBox.scrollTop = refs.chatBox.scrollHeight; }
         async function handleChat() { const value = refs.chatInput.value.trim(); if (!value) return; addChat('user', value); const sendButton = document.getElementById('sendChatBtn'); sendButton.classList.add('loading'); try { const reply = await fetchAIReply(value); addChat('ai', reply); state.conversationContext.push({ user: value, ai: reply }); } catch (error) { console.error(error); addChat('ai', `⚠️ AI service unavailable. Using a local response:\n\n${generateSmartAIReply(value.toLowerCase())}`); } finally { sendButton.classList.remove('loading'); refs.chatInput.value = ''; } }
