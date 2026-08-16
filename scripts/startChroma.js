@@ -1,7 +1,26 @@
+import 'dotenv/config';
 import http from 'http';
 
 const CHROMA_PORT = process.env.CHROMA_PORT || 8000;
 const collections = new Map();
+
+function resolveCollection(ref) {
+    if (!ref) {
+        return null;
+    }
+
+    if (collections.has(ref)) {
+        return collections.get(ref);
+    }
+
+    for (const collection of collections.values()) {
+        if (collection.id === ref || collection.name === ref) {
+            return collection;
+        }
+    }
+
+    return null;
+}
 
 async function startChromaServer() {
     console.log(`Starting ChromaDB server on port ${CHROMA_PORT}...`);
@@ -44,7 +63,7 @@ async function startChromaServer() {
                         const id = `collection-${Date.now()}-${Math.random()}`;
 
                         if (!collections.has(name)) {
-                            collections.set(name, {
+                            const collection = {
                                 id,
                                 name,
                                 metadata: metadata || {},
@@ -52,14 +71,18 @@ async function startChromaServer() {
                                 embeddings: [],
                                 metadatas: [],
                                 ids: []
-                            });
+                            };
+                            collections.set(name, collection);
+                            collections.set(id, collection);
                         }
+
+                        const collection = collections.get(name);
 
                         res.writeHead(200);
                         res.end(JSON.stringify({
-                            id,
-                            name,
-                            metadata: metadata || {}
+                            id: collection.id,
+                            name: collection.name,
+                            metadata: collection.metadata || {}
                         }));
                     } catch (error) {
                         res.writeHead(400);
@@ -78,22 +101,24 @@ async function startChromaServer() {
                 });
                 req.on('end', async () => {
                     try {
-                        const collectionName = decodeURIComponent(addMatch[1]);
+                        const collectionKey = decodeURIComponent(addMatch[1]);
                         const { ids, embeddings, documents, metadatas } = JSON.parse(body);
 
-                        if (!collections.has(collectionName)) {
-                            collections.set(collectionName, {
-                                id: collectionName,
-                                name: collectionName,
+                        let collection = resolveCollection(collectionKey);
+                        if (!collection) {
+                            collection = {
+                                id: collectionKey,
+                                name: collectionKey,
                                 metadata: {},
                                 documents: [],
                                 embeddings: [],
                                 metadatas: [],
                                 ids: []
-                            });
+                            };
+                            collections.set(collectionKey, collection);
+                            collections.set(collection.id, collection);
                         }
 
-                        const collection = collections.get(collectionName);
                         collection.ids.push(...ids);
                         collection.embeddings.push(...embeddings);
                         collection.documents.push(...documents);
@@ -118,25 +143,38 @@ async function startChromaServer() {
                 });
                 req.on('end', async () => {
                     try {
-                        const collectionName = decodeURIComponent(queryMatch[1]);
-                        const { query_embeddings, n_results, include } = JSON.parse(body);
+                        const collectionKey = decodeURIComponent(queryMatch[1]);
+                        const payload = JSON.parse(body);
+                        const queryEmbeddings = Array.isArray(payload.query_embeddings) ? payload.query_embeddings : (Array.isArray(payload.query_embedding) ? [payload.query_embedding] : []);
+                        const nResults = Number(payload.n_results || 3);
+                        const include = payload.include || ['documents'];
 
-                        if (!collections.has(collectionName)) {
+                        const collection = resolveCollection(collectionKey);
+                        if (!collection) {
                             res.writeHead(404);
                             res.end(JSON.stringify({ error: 'Collection not found' }));
                             return;
                         }
 
-                        const collection = collections.get(collectionName);
-                        const queryEmbedding = query_embeddings[0];
+                        if (!queryEmbeddings.length) {
+                            res.writeHead(400);
+                            res.end(JSON.stringify({ error: 'query_embeddings is required' }));
+                            return;
+                        }
+
+                        const queryEmbedding = queryEmbeddings[0];
 
                         // Simple cosine similarity search
                         const results = collection.ids.map((id, idx) => {
-                            const embedding = collection.embeddings[idx];
+                            const embedding = Array.isArray(collection.embeddings[idx]) ? collection.embeddings[idx] : [];
+                            if (!embedding.length || !Array.isArray(queryEmbedding) || queryEmbedding.length !== embedding.length) {
+                                return null;
+                            }
+
                             const dotProduct = queryEmbedding.reduce((sum, val, i) => sum + val * embedding[i], 0);
                             const normQuery = Math.sqrt(queryEmbedding.reduce((sum, val) => sum + val * val, 0));
                             const normEmbedding = Math.sqrt(embedding.reduce((sum, val) => sum + val * val, 0));
-                            const similarity = dotProduct / (normQuery * normEmbedding || 1);
+                            const similarity = normQuery && normEmbedding ? dotProduct / (normQuery * normEmbedding) : 0;
 
                             return {
                                 id,
@@ -145,7 +183,7 @@ async function startChromaServer() {
                                 document: collection.documents[idx],
                                 metadata: collection.metadatas[idx]
                             };
-                        }).sort((a, b) => b.similarity - a.similarity).slice(0, n_results);
+                        }).filter(Boolean).sort((a, b) => b.similarity - a.similarity).slice(0, nResults);
 
                         res.writeHead(200);
                         res.end(JSON.stringify({

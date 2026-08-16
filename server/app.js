@@ -8,10 +8,13 @@ import chatRoutes from './routes/chat.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
+const publicDir = path.join(__dirname, '..', 'public');
+const srcDir = path.join(__dirname, '..', 'src');
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(express.static(publicDir));
+app.use('/src', express.static(srcDir));
 app.use('/api/chat', chatRoutes);
 
 app.get('/health', (_req, res) => {

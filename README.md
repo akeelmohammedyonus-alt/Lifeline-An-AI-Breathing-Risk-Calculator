@@ -8,11 +8,16 @@ LifeLine AI is a breathing-risk web app for monitoring environmental conditions 
 - New Zealand / Auckland timezone-aware assistance
 
 ## Project structure
-- public/ - static frontend assets
-- src/ - shared app logic and helpers
+- public/ - static frontend assets and dashboard UI
+- src/
+  - risk/ - risk scoring and risk classification
+  - validation/ - human-friendly temperature, humidity, air quality, and stress validation
+  - time.js - timezone helper logic
 - server/ - Express app, routes, and controllers
 - config/ - environment configuration
+- scripts/ - local Chroma and utility scripts
 - tests/ - regression tests
+- documents/ - user PDF source documents for the RAG workflow
 
 ## Run locally
 1. Install dependencies: npm install

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import path from 'path';
 import { getPdfPaths, extractTextFromPdf } from './pdfLoader.js';
 import { splitIntoChunks } from './chunker.js';
