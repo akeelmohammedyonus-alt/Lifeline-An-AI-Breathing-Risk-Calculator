@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generateLocalFallbackReply, createMessages } from '../server/controllers/chatController.js';
 import { getAiProviderSettings } from '../config/env.js';
+import { validateHumanEnvironmentalInputs } from '../src/validation/environmentValidation.js';
+import { calculateRiskScore } from '../src/risk/riskScoring.js';
 
 test('returns safety-focused guidance for breathing symptoms', () => {
     const reply = generateLocalFallbackReply('I am wheezing and short of breath', []);
@@ -21,4 +23,24 @@ test('supports switching between OpenAI and local Ollama providers', () => {
     assert.equal(ollama.provider, 'ollama');
     assert.equal(ollama.ollamaBaseUrl, 'http://localhost:11434');
     assert.ok(createMessages([], 'hello').length >= 2);
+});
+
+test('accepts real AQI and stress ranges without invalidating the assessment', () => {
+    const validation = validateHumanEnvironmentalInputs({
+        temp: 20,
+        humidity: 55,
+        airq: 120,
+        stress: 75
+    });
+
+    assert.equal(validation.valid, true);
+    assert.ok(calculateRiskScore({ temp: 20, humidity: 55, airq: 120, activity: 2, stress: 75 }) > 0);
+});
+
+test('accepts the full allowed temperature range from -15°C to 45°C', () => {
+    const low = validateHumanEnvironmentalInputs({ temp: -15, humidity: 50, airq: 20, stress: 20 });
+    const high = validateHumanEnvironmentalInputs({ temp: 45, humidity: 50, airq: 20, stress: 20 });
+
+    assert.equal(low.valid, true);
+    assert.equal(high.valid, true);
 });
