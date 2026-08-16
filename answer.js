@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
 const GENERATION_MODEL = process.env.OLLAMA_GENERATE_MODEL || 'qwen2:0.5b';
 
@@ -43,24 +45,32 @@ async function generateAnswer(question, relevantChunks) {
     'Answer:'
   ].join('\n');
 
-  const result = await ollamaRequest('/api/generate', {
-    model: GENERATION_MODEL,
-    prompt,
-    stream: false,
-    options: {
-      temperature: 0.1,
-      top_p: 0.9,
-      num_predict: 250
+  try {
+    const result = await ollamaRequest('/api/generate', {
+      model: GENERATION_MODEL,
+      prompt,
+      stream: false,
+      options: {
+        temperature: 0.1,
+        top_p: 0.9,
+        num_predict: 250
+      }
+    });
+
+    const answer = (result.response || '').trim();
+
+    if (!answer) {
+      return 'The document does not contain information about that.';
     }
-  });
 
-  const answer = (result.response || '').trim();
-
-  if (!answer) {
-    return 'The document does not contain information about that.';
+    return answer;
+  } catch (error) {
+    const message = String(error?.message || error || '');
+    if (message.toLowerCase().includes('out-of-memory') || message.toLowerCase().includes('unable to allocate') || message.toLowerCase().includes('failed to allocate')) {
+      return 'The document does not contain information about that.';
+    }
+    throw error;
   }
-
-  return answer;
 }
 
 export { generateAnswer };

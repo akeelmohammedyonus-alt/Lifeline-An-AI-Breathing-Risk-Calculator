@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { embedText } from './embed.js';
 
 const CHROMA_BASE_URL = process.env.CHROMA_BASE_URL || 'http://localhost:8000';

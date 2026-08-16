@@ -10,7 +10,7 @@
         "test": "node --test",
         "rag": "node rag.js",
         "chroma": "node scripts/startChroma.js",
-        "startall": "node server/server.js & node rag.js & node scripts/startChroma.js & node server/server.js",
+        "startall": "node scripts/startChroma.js & node server/server.js",
         "dev": "node scripts/startChroma.js & node server/server.js"
     },
     "dependencies": {
