@@ -1,31 +1,10 @@
-import { ChromaClient, EmbeddingFunction } from 'chromadb';
 import http from 'http';
 
 const CHROMA_PORT = process.env.CHROMA_PORT || 8000;
-let client;
-let collections = new Map();
-
-// Simple embedding function placeholder
-class SimpleEmbeddingFunction extends EmbeddingFunction {
-    async call(texts) {
-        return texts.map((text) =>
-            Array(768).fill(0).map(() => Math.random())
-        );
-    }
-}
+const collections = new Map();
 
 async function startChromaServer() {
     console.log(`Starting ChromaDB server on port ${CHROMA_PORT}...`);
-
-    // Initialize ChromaDB client with ephemeral (in-memory) mode
-    try {
-        client = new ChromaClient();
-        console.log('ChromaDB client initialized');
-    } catch (err) {
-        console.error('Failed to initialize ChromaDB client:', err.message);
-        console.log('Using ephemeral mode fallback...');
-        client = new ChromaClient({ settings: { allow_reset: true } });
-    }
 
     // Create a simple HTTP proxy to ChromaDB client
     const server = http.createServer(async (req, res) => {

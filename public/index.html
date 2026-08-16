@@ -1274,6 +1274,46 @@
             const trend = getTrendSummary(); refs.miniTrend.textContent = trend.label; refs.miniTrend.title = trend.detail; refs.emojiResult.textContent = meta.emoji;
         }
 
+        function buildRiskAnalysisPrompt(inputs, risk) {
+            const band = getBandMeta(risk);
+            const tips = getPersonalizedAdvice(inputs);
+            const trend = getTrendSummary();
+            const primaryFactor = getPrimaryFactor(inputs);
+
+            return `Analyze this breathing risk assessment and give a clear, safe response.
+
+Risk details:
+- Risk score: ${risk.toFixed(1)}/10
+- Risk level: ${band.label}
+- Temperature: ${inputs.temp}°C
+- Humidity: ${inputs.humidity}%
+- Air quality: ${inputs.airq}
+- Activity level: ${inputs.activity}/10
+- Stress level: ${inputs.stress}/10
+- Main trigger: ${primaryFactor}
+- Recent trend: ${trend.label} (${trend.detail})
+
+Suggested actions:
+- ${tips.join('\n- ')}
+
+Please respond with:
+1. a brief explanation of the risk
+2. very short safe advice
+3. whether the person should rest, reduce activity, or seek medical help
+4. only mention emergency care if the situation is serious or worsening`;
+        }
+
+        async function sendRiskAnalysisToAI(inputs, risk) {
+            const prompt = buildRiskAnalysisPrompt(inputs, risk);
+            try {
+                const reply = await fetchAIReply(prompt);
+                addChat('ai', reply);
+            } catch (error) {
+                console.error('Risk analysis API call failed:', error);
+                addChat('ai', '⚠️ The AI service is unavailable right now. Please try again in a moment.');
+            }
+        }
+
         function calculateRisk() {
             const inputs = readInputs(); const errors = validateInputs(inputs); if (errors.length) { refs.result.innerHTML = `<span class="error">⚠️ ${errors.join(', ')}</span>`; return; }
             const risk = calculateRiskScore(inputs); state.lastRisk = risk; const band = getBandMeta(risk);
@@ -1281,7 +1321,7 @@
             const trend = getTrendSummary(); refs.miniTrend.textContent = trend.label; refs.miniTrend.title = trend.detail;
             const tips = getPersonalizedAdvice(inputs); refs.advice.innerHTML = `<strong>Recommendation:</strong> ${tips[0]}`; refs.advice.style.display = 'block'; refs.tipsList.innerHTML = tips.map((tip) => `<li>${tip}</li>`).join(''); refs.tips.style.display = 'block';
             addRiskHistory(risk); updateHistoryTable(); drawGraph(); saveData();
-            setTimeout(() => { addChat('ai', generateContextAwareReply(inputs, risk)); }, 450);
+            setTimeout(() => { sendRiskAnalysisToAI(inputs, risk); }, 450);
         }
 
         function addRiskHistory(risk) { state.riskHistory.push(risk); if (state.riskHistory.length > 14) state.riskHistory.shift(); }
