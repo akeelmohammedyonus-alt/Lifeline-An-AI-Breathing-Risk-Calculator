@@ -1,24 +1,25 @@
-name: Deploy LifeLine site to GitHub Pages
+name: Build and publish Docker image to GHCR
 
 on:
   push:
     branches: ["main"]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+env:
+  IMAGE_NAME: lifeline-ai
+  IMAGE_TAG: ${{ github.sha }}
+  REGISTRY: ghcr.io
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Node
@@ -33,27 +34,23 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Build static Pages artifact
+      - name: Set GHCR image path
         run: |
-          mkdir -p _site
-          cp -R public/. _site/
-          touch _site/.nojekyll
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE_PATH=${REGISTRY}/${OWNER}/${IMAGE_NAME}" >> $GITHUB_ENV
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./_site
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
+      - name: Build Docker image
+        run: |
+          docker build -t ${IMAGE_PATH}:${IMAGE_TAG} .
+          docker tag ${IMAGE_PATH}:${IMAGE_TAG} ${IMAGE_PATH}:latest
+
+      - name: Push Docker image to GHCR
+        run: |
+          docker push ${IMAGE_PATH}:${IMAGE_TAG}
+          docker push ${IMAGE_PATH}:latest
+
+      - name: Show image URL
+        run: echo "Image published to ${IMAGE_PATH}:${IMAGE_TAG}"
