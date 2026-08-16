@@ -972,20 +972,20 @@
             <div class="card">
                 <div class="card-title">🫁 Risk assessment</div>
                 <div class="field-group"><label for="temp">Temperature (°C)</label><input id="temp" type="number"
-                        placeholder="5 - 35" min="0" max="50" value="20"></div>
+                        placeholder="-15 - 45" min="-15" max="45" value="20"></div>
                 <div class="field-group"><label for="humidity">Humidity (%)</label><input id="humidity" type="number"
                         placeholder="0 - 100" min="0" max="100" value="55"></div>
-                <div class="field-group"><label for="airq">Air quality</label><input id="airq" type="range" min="1"
-                        max="5" value="3">
-                    <div class="range-row"><span>clean</span><strong id="airqValue">3</strong><span>poor</span></div>
+                <div class="field-group"><label for="airq">AQI (0-500)</label><input id="airq" type="range" min="0"
+                        max="500" value="150">
+                    <div class="range-row"><span>clean</span><strong id="airqValue">150</strong><span>poor</span></div>
                 </div>
                 <div class="field-group"><label for="activity">Activity level</label><input id="activity" type="range"
                         min="1" max="5" value="2">
                     <div class="range-row"><span>low</span><strong id="activityValue">2</strong><span>high</span></div>
                 </div>
-                <div class="field-group"><label for="stress">Stress level</label><input id="stress" type="range" min="1"
-                        max="5" value="2">
-                    <div class="range-row"><span>calm</span><strong id="stressValue">2</strong><span>high</span></div>
+                <div class="field-group"><label for="stress">Stress level (0-100)</label><input id="stress" type="range" min="0"
+                        max="100" value="35">
+                    <div class="range-row"><span>rest</span><strong id="stressValue">35</strong><span>high</span></div>
                 </div>
                 <button class="btn-primary" id="calculateBtn" type="button">Analyze risk</button>
                 <div class="status-card">
@@ -1034,6 +1034,29 @@
                             temporary irritation and infections to chronic diseases that change how the body exchanges
                             oxygen and carbon dioxide. Many illnesses become more noticeable when environmental triggers
                             such as cold air, smoke, allergens, humidity extremes, or poor air quality are present.</p>
+                        <p>Air quality is measured on a scale from 0 to 500, known as the Air Quality Index (AQI). It is
+                            calculated by collecting samples of outdoor air at monitoring stations and using specialized
+                            tools to detect pollutant gases and tiny particles, helping show how clean or dirty the air is.</p>
+                        <div class="aqi-ranges" style="margin-top: 1rem; font-size: 0.9rem;">
+                            <h4 style="margin: 0 0 0.7rem;">AQI Standard Ranges (US EPA)</h4>
+                            <ul style="padding-left: 1.2rem; margin: 0; line-height: 1.7;">
+                                <li><strong>0–50</strong> → Good (Green): Air quality is clean. No breathing problems for anyone.</li>
+                                <li><strong>51–100</strong> → Moderate (Yellow): Air is acceptable. Sensitive groups may feel mild irritation.</li>
+                                <li><strong>101–150</strong> → Unhealthy for Sensitive Groups (Orange): People with asthma, COPD, kids, and elderly may feel symptoms.</li>
+                                <li><strong>151–200</strong> → Unhealthy (Red): Everyone may start feeling breathing discomfort.</li>
+                                <li><strong>201–300</strong> → Very Unhealthy (Purple): Health warnings for everyone.</li>
+                                <li><strong>301–500</strong> → Hazardous (Maroon): Serious health risks to the public.</li>
+                            </ul>
+                        </div>
+                        <div class="stress-ranges" style="margin-top: 1rem; font-size: 0.9rem;">
+                            <h4 style="margin: 0 0 0.7rem;">Stress level guide</h4>
+                            <ul style="padding-left: 1.2rem; margin: 0; line-height: 1.7;">
+                                <li><strong>0–25: Rest</strong> — Very low physiological stress. Breathing is relaxed and stable.</li>
+                                <li><strong>26–50: Low Stress</strong> — Mild activation of the body. Breathing may be slightly faster but still comfortable.</li>
+                                <li><strong>51–75: Medium Stress</strong> — Noticeable physical or mental strain. Breathing becomes shallower, and asthma-sensitive people may feel tightness.</li>
+                                <li><strong>76–100: High Stress</strong> — Strong physiological or emotional pressure. Airways can tighten, increasing asthma risk.</li>
+                            </ul>
+                        </div>
                         <div class="diagram">
                             <div class="node"><strong>Air entry</strong>nose and throat</div>
                             <div class="node"><strong>Airways</strong>bronchi and bronchioles</div>
@@ -1259,7 +1282,7 @@
         }
         function getRiskBand(risk) { return getRiskBandCore(risk); }
         function getBandMeta(risk) { return getBandMetaCore(risk); }
-        function getPersonalizedAdvice(inputs) { const tips = []; const { temp, humidity, airq, activity, stress } = inputs; if (humidity > 70) tips.push('Use a dehumidifier and improve airflow indoors.'); if (humidity < 30) tips.push('Add a humidifier or drink more water to ease dry airways.'); if (airq >= 4) tips.push('Avoid prolonged outdoor exposure until air quality improves.'); if (activity >= 4) tips.push('Take breaks and pace your movement to reduce strain.'); if (stress >= 4) tips.push('Try slow breathing and a short reset before continuing.'); if (temp < 10) tips.push('Keep warm and avoid sudden bursts of cold air.'); if (temp > 28) tips.push('Stay hydrated and reduce exertion during peak heat.'); if (tips.length === 0) tips.push('Conditions look favorable — keep your routine balanced and steady.'); return tips; }
+        function getPersonalizedAdvice(inputs) { const tips = []; const { temp, humidity, airq, activity, stress } = inputs; if (humidity > 70) tips.push('Use a dehumidifier and improve airflow indoors.'); if (humidity < 30) tips.push('Add a humidifier or drink more water to ease dry airways.'); if (airq >= 101) tips.push('Avoid prolonged outdoor exposure until the AQI improves.'); if (activity >= 4) tips.push('Take breaks and pace your movement to reduce strain.'); if (stress >= 76) tips.push('Try slow breathing and a short reset before continuing.'); if (temp < 10) tips.push('Keep warm and avoid sudden bursts of cold air.'); if (temp > 28) tips.push('Stay hydrated and reduce exertion during peak heat.'); if (tips.length === 0) tips.push('Conditions look favorable — keep your routine balanced and steady.'); return tips; }
 
         function getTrendSummary() {
             if (state.riskHistory.length < 2) {
@@ -1295,9 +1318,9 @@ Risk details:
 - Risk level: ${band.label}
 - Temperature: ${inputs.temp}°C
 - Humidity: ${inputs.humidity}%
-- Air quality: ${inputs.airq}
+- Air quality: ${inputs.airq} AQI
 - Activity level: ${inputs.activity}/10
-- Stress level: ${inputs.stress}/10
+- Stress level: ${inputs.stress}/100
 - Main trigger: ${primaryFactor}
 - Recent trend: ${trend.label} (${trend.detail})
 
@@ -1425,7 +1448,7 @@ Please respond with:
         async function handleChat() { const value = refs.chatInput.value.trim(); if (!value) return; addChat('user', value); const sendButton = document.getElementById('sendChatBtn'); sendButton.classList.add('loading'); try { const reply = await fetchAIReply(value); addChat('ai', reply); state.conversationContext.push({ user: value, ai: reply }); } catch (error) { console.error(error); addChat('ai', `⚠️ AI service unavailable. Using a local response:\n\n${generateSmartAIReply(value.toLowerCase())}`); } finally { sendButton.classList.remove('loading'); refs.chatInput.value = ''; } }
         async function fetchAIReply(input) { const response = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: input, history: state.conversationContext }) }); if (!response.ok) throw new Error(`AI server error: ${response.status}`); const data = await response.json(); return data.reply || 'Sorry, I could not produce a response.'; }
         function generateContextAwareReply(inputs, risk) { state.userProfile.lastAssessment = { ...inputs, risk, timestamp: new Date() }; const trends = analyzeRiskTrends(); const primaryFactor = getPrimaryFactor(inputs); let response = ''; if (risk >= 7.5) response = `🔴 High concern detected\n\nYour breathing risk is ${risk.toFixed(1)}/10. The strongest factor is ${primaryFactor}.\n\n• Reduce exertion and avoid extended outdoor time\n• Use calming, steady breathing and keep your environment stable\n• Seek medical support if symptoms worsen`; else if (risk >= 4.5) response = `🟡 Elevated risk\n\nYour breathing environment is drifting into a less comfortable range, especially around ${primaryFactor}.\n\n• Pace movement and monitor your symptoms\n• Improve airflow or hydration if needed\n• Keep an eye on trends over the next few checks`; else response = `🟢 Comfortable conditions\n\nYour breathing risk remains low at ${risk.toFixed(1)}/10. This is a good window to stay calm and steady.\n\n• Continue monitoring your environment\n• Keep hydration and rest consistent\n• Enjoy manageable conditions while they last`; if (trends && trends.trend === 'worsening') response += `\n\n⚠️ Your recent trend is worsening, so it may be wise to reassess soon.`; return response; }
-        function getPrimaryFactor(inputs) { const { humidity, airq, activity, stress, temp } = inputs; if (humidity > 70 || humidity < 30) return 'humidity'; if (airq >= 4) return 'air quality'; if (activity >= 4) return 'activity level'; if (stress >= 4) return 'stress'; if (temp < 10 || temp > 28) return 'temperature'; return 'overall balance'; }
+        function getPrimaryFactor(inputs) { const { humidity, airq, activity, stress, temp } = inputs; if (humidity > 70 || humidity < 30) return 'humidity'; if (airq >= 101) return 'air quality'; if (activity >= 4) return 'activity level'; if (stress >= 76) return 'stress'; if (temp < 10 || temp > 28) return 'temperature'; return 'overall balance'; }
         function generateSmartAIReply(query) { const lower = query.toLowerCase(); if (lower.includes('humidity')) return 'Humidity influences how easily the air feels to breathe. Aim for a balanced range and adjust indoors when it becomes extreme.'; if (lower.includes('stress')) return 'Stress often makes breathing feel more shallow. A slow 4-6 breathing pattern can help you settle quickly.'; if (lower.includes('exercise')) return 'Warm up gently, avoid high exertion in poor air, and take breaks if your breathing feels strained.'; if (lower.includes('air')) return 'Air quality matters a lot. Reduce outdoor activity when pollution or allergens are high.'; return 'I can help with humidity, air quality, temperature, exercise, stress, or your risk trend. Ask me about any of them.'; }
         function clearAllData() { if (!confirm('Clear all saved assessments and start fresh?')) return; state.riskHistory = []; state.lastRisk = 0; localStorage.removeItem('lifelineRiskHistory'); localStorage.removeItem('lifelineUserProfile'); refs.historyTable.innerHTML = ''; refs.result.innerHTML = 'Your breathing profile will appear here.'; refs.emojiResult.textContent = '💙'; refs.advice.style.display = 'none'; refs.tips.style.display = 'none'; refs.tipsList.innerHTML = ''; drawGraph(); addChat('ai', '✨ Data cleared. The assistant is ready for a fresh assessment.'); }
         function initialize() { bindEvents(); updateLivePreview(); loadData(); drawGraph(); addChat('ai', '👋 Hello! I can help you assess breathing conditions, explain your risk, and suggest calm, practical next steps.'); }

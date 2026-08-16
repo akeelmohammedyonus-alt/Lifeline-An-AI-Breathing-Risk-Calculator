@@ -7,11 +7,20 @@ export function calculateRiskScore(inputs = {}) {
   if (humidity < 30) risk += 1.1;
   if (temp < 10) risk += 1.4;
   if (temp > 28) risk += 1.0;
-  if (airq >= 4) risk += 2.3;
+
+  if (airq >= 301) risk += 3.2;
+  else if (airq >= 201) risk += 2.8;
+  else if (airq >= 151) risk += 2.2;
+  else if (airq >= 101) risk += 1.5;
+  else if (airq >= 51) risk += 0.8;
+
   if (activity >= 4) risk += 1.7;
-  if (stress >= 4) risk += 1.4;
-  if (activity >= 3 && airq >= 4) risk += 0.9;
-  if (stress >= 4 && humidity > 70) risk += 0.8;
+  if (stress >= 76) risk += 2.4;
+  else if (stress >= 51) risk += 1.6;
+  else if (stress >= 26) risk += 0.8;
+
+  if (activity >= 3 && airq >= 101) risk += 0.9;
+  if (stress >= 76 && humidity > 70) risk += 0.8;
   if (temp < 8 || temp > 32) risk += 0.6;
   if (humidity > 80 || humidity < 25) risk += 0.5;
 
