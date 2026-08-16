@@ -6,7 +6,7 @@
     "main": "server/server.js",
     "scripts": {
         "start": "node server/server.js",
-        "stop": "npx kill-port 3000",
+        "stop": "node scripts/stop.js",
         "test": "node --test"
     },
     "dependencies": {
