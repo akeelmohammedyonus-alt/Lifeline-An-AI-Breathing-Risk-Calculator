@@ -42,15 +42,21 @@ jobs:
       - name: Log in to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Build Docker image
-        run: |
-          docker build -t ${IMAGE_PATH}:${IMAGE_TAG} .
-          docker tag ${IMAGE_PATH}:${IMAGE_TAG} ${IMAGE_PATH}:latest
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-      - name: Push Docker image to GHCR
-        run: |
-          docker push ${IMAGE_PATH}:${IMAGE_TAG}
-          docker push ${IMAGE_PATH}:latest
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push multi-platform image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGE_PATH }}:${{ env.IMAGE_TAG }}
+            ${{ env.IMAGE_PATH }}:latest
 
       - name: Show image URL
         run: echo "Image published to ${IMAGE_PATH}:${IMAGE_TAG}"
