@@ -30,7 +30,7 @@ Create a .env file with:
 - OPENAI_MODEL=gpt-5.4-mini
 
 ## Deploy on a cloud VM
-The repository includes `compose.yaml` and `Caddyfile` for running the app behind a public HTTPS hostname with automatic Let's Encrypt certificates.
+The repository includes `compose.yaml` for running the app behind a public HTTPS hostname with automatic Let's Encrypt certificates. Caddy is configured directly in Compose.
 
 1. Create a DNS `A` record for your hostname, such as `app.example.com`, pointing to the VM's public IPv4 address.
 2. Allow inbound TCP ports 80 and 443 in the VM/cloud firewall. Keep SSH restricted to your own IP where possible.
@@ -49,6 +49,7 @@ PORT=3000
 ```bash
 export LIFELINE_IMAGE=ghcr.io/OWNER/lifeline-ai:latest
 export DOMAIN=app.example.com
+docker compose pull
 docker compose up -d
 ```
 

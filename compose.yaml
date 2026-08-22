@@ -19,13 +19,17 @@ services:
     depends_on:
       app:
         condition: service_healthy
-    environment:
-      DOMAIN: ${DOMAIN:?Set DOMAIN to your public hostname}
+    command:
+      - caddy
+      - reverse-proxy
+      - --from
+      - ${DOMAIN:?Set DOMAIN to your public hostname}
+      - --to
+      - app:3000
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
 
