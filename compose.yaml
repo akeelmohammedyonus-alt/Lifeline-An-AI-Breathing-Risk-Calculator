@@ -4,8 +4,8 @@ services:
     restart: unless-stopped
     env_file:
       - /etc/lifeline/lifeline.env
-    expose:
-      - "3000"
+    ports:
+      - "127.0.0.1:3001:3000"
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(response => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"]
       interval: 30s
@@ -13,26 +13,3 @@ services:
       retries: 3
       start_period: 10s
 
-  caddy:
-    image: caddy:2-alpine
-    restart: unless-stopped
-    depends_on:
-      app:
-        condition: service_healthy
-    command:
-      - caddy
-      - reverse-proxy
-      - --from
-      - ${DOMAIN:?Set DOMAIN to your public hostname}
-      - --to
-      - app:3000
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - caddy_data:/data
-      - caddy_config:/config
-
-volumes:
-  caddy_data:
-  caddy_config:
