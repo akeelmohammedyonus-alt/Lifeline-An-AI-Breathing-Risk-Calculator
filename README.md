@@ -30,12 +30,22 @@ Create a .env file with:
 - OPENAI_MODEL=gpt-5.4-mini
 
 ## Deploy on a cloud VM
-The repository includes `compose.yaml` for running the app behind a public HTTPS hostname with automatic Let's Encrypt certificates. Caddy is configured directly in Compose.
+The repository includes `compose.yaml` for running the app behind the existing `nginx-proxy` and `acme-companion` containers. The app does not publish a host port, so it does not conflict with services using ports 80 and 443. It joins the proxy's Docker network and registers the hostname for automatic HTTPS.
 
-1. Create a DNS `A` record for your hostname, such as `app.example.com`, pointing to the VM's public IPv4 address.
-2. Allow inbound TCP ports 80 and 443 in the VM/cloud firewall. Keep SSH restricted to your own IP where possible.
-3. Install Docker Engine and the Compose plugin on the VM, then authenticate to GHCR if the image is private.
-4. Create `/etc/lifeline/lifeline.env` on the VM:
+1. Create a DNS `A` record for `lifelinebrc.ddns.net` pointing to the VM's public IPv4 address.
+2. Find the Docker network used by the existing proxy:
+
+```bash
+sudo docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Ports}}'
+sudo docker inspect EXISTING_PROXY_CONTAINER --format '{{range $name, $network := .NetworkSettings.Networks}}{{$name}}{{"\n"}}{{end}}'
+```
+
+Use the network name returned by the second command as `PROXY_NETWORK` below.
+
+3. The Compose variables below configure `nginx-proxy` to route `lifelinebrc.ddns.net` to port 3000 and configure `acme-companion` to request a trusted Let's Encrypt certificate.
+4. Allow inbound TCP ports 80 and 443 in the VM/cloud firewall. Keep SSH restricted to your own IP where possible.
+5. Install Docker Engine and the Compose plugin on the VM, then authenticate to GHCR if the image is private.
+6. From the directory containing `compose.yaml`, create `lifeline.env`:
 
 ```env
 AI_PROVIDER=openai
@@ -44,15 +54,51 @@ OPENAI_MODEL=gpt-5.4-mini
 PORT=3000
 ```
 
-5. From the repository directory on the VM, start the stack. Replace the owner and hostname with your values:
+7. Create `.env` beside `compose.yaml`:
+
+```env
+LIFELINE_IMAGE=ghcr.io/YOUR_GITHUB_OWNER/lifeline-ai:latest
+PROXY_NETWORK=YOUR_EXISTING_PROXY_NETWORK
+DOMAIN=lifelinebrc.ddns.net
+LETSENCRYPT_EMAIL=your-email@example.com
+```
+
+8. Start the app:
 
 ```bash
-export LIFELINE_IMAGE=ghcr.io/OWNER/lifeline-ai:latest
-export DOMAIN=app.example.com
+chmod 600 lifeline.env .env
 docker compose pull
 docker compose up -d
 ```
 
-Caddy validates the hostname and obtains the certificate automatically. The DNS record must already resolve to the VM, and ports 80/443 must be reachable for certificate issuance. Verify the deployment at `https://app.example.com/health`.
+Verify the public URL at `https://lifelinebrc.ddns.net/health`. Check the container with `docker compose ps` and `docker compose logs --tail=100 app`. The existing proxy should discover the app through `VIRTUAL_HOST=lifelinebrc.ddns.net` and `VIRTUAL_PORT=3000`.
+
+### Combined Nextcloud deployment
+If the VM already runs the Nextcloud stack from the original Compose project, use `docker-compose.nextcloud.yml` instead of the standalone `compose.yaml`. Copy it into the original Nextcloud Compose directory, where `proxy/`, `db.env`, and the named volumes are already configured.
+
+Create `lifeline.env` in that same directory:
+
+```env
+AI_PROVIDER=openai
+OPENAI_API_KEY=your_key_here
+OPENAI_MODEL=gpt-5.4-mini
+PORT=3000
+```
+
+Create or update the original Compose `.env` with:
+
+```env
+MYSQL_ROOT_PASSWORD=use-a-strong-password
+```
+
+Then run:
+
+```bash
+sudo /usr/local/bin/docker-compose -f docker-compose.nextcloud.yml config
+sudo /usr/local/bin/docker-compose -f docker-compose.nextcloud.yml pull lifeline
+sudo /usr/local/bin/docker-compose -f docker-compose.nextcloud.yml up -d --force-recreate lifeline proxy letsencrypt-companion
+```
+
+The combined file registers `lifelinebrc.ddns.net` automatically with `nginx-proxy` and `acme-companion`; do not run the standalone LifeLine Compose stack at the same time.
 
 

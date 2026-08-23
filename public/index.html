@@ -566,6 +566,37 @@
             min-height: 74px;
         }
 
+        .location-panel {
+            padding: 12px;
+            margin-bottom: 14px;
+            border: 1px solid rgba(57, 167, 255, 0.24);
+            border-radius: 14px;
+            background: rgba(57, 167, 255, 0.08);
+        }
+
+        .location-panel h3 {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: #dceeff;
+        }
+
+        .location-panel p {
+            color: var(--muted);
+            font-size: 0.8rem;
+            line-height: 1.45;
+        }
+
+        .location-panel .btn-secondary {
+            margin-top: 8px;
+        }
+
+        #locationStatus {
+            margin-top: 8px;
+            color: #bfe8c5;
+            font-size: 0.8rem;
+            line-height: 1.45;
+        }
+
         #result {
             font-weight: 700;
             font-size: 1rem;
@@ -971,6 +1002,12 @@
         <section class="layout">
             <div class="card">
                 <div class="card-title">🫁 Risk assessment</div>
+                <div class="location-panel">
+                    <h3>Local conditions</h3>
+                    <p>Use your device location to load current weather and air quality from Open-Meteo.</p>
+                    <button class="btn-secondary" id="useLocationBtn" type="button">Use my location</button>
+                    <div id="locationStatus" role="status" aria-live="polite">Manual values are ready.</div>
+                </div>
                 <div class="field-group"><label for="temp">Temperature (°C)</label><input id="temp" type="number"
                         placeholder="-15 - 45" min="-15" max="45" value="20"></div>
                 <div class="field-group"><label for="humidity">Humidity (%)</label><input id="humidity" type="number"
@@ -1231,10 +1268,10 @@
         import { validateHumanEnvironmentalInputs } from '../src/validation/environmentValidation.js';
         import { calculateRiskScore as calculateRiskScoreCore, getRiskBand as getRiskBandCore, getBandMeta as getBandMetaCore } from '../src/risk/riskScoring.js';
 
-        const state = { riskHistory: [], lastRisk: 0, conversationContext: [], userProfile: { triggers: [], preferences: {}, riskPatterns: [], conversationCount: 0, lastAssessment: null } };
+        const state = { riskHistory: [], lastRisk: 0, conversationContext: [], environment: null, userProfile: { triggers: [], preferences: {}, riskPatterns: [], conversationCount: 0, lastAssessment: null } };
         const refs = {
             temp: document.getElementById('temp'), humidity: document.getElementById('humidity'), airq: document.getElementById('airq'), activity: document.getElementById('activity'), stress: document.getElementById('stress'),
-            airqValue: document.getElementById('airqValue'), activityValue: document.getElementById('activityValue'), stressValue: document.getElementById('stressValue'), result: document.getElementById('result'), emojiResult: document.getElementById('emojiResult'), advice: document.getElementById('advice'), tips: document.getElementById('tips'), tipsList: document.getElementById('tipsList'), graphCanvas: document.getElementById('graphCanvas'), historyTable: document.getElementById('historyTable'), chatBox: document.getElementById('chatBox'), chatInput: document.getElementById('chatInput'), gaugeScore: document.getElementById('gaugeScore'), gaugeLabel: document.getElementById('gaugeLabel'), gaugeSummary: document.getElementById('gaugeSummary'), gaugeProgress: document.getElementById('gaugeProgress'), miniStatus: document.getElementById('miniStatus'), miniTrend: document.getElementById('miniTrend'), miniTime: document.getElementById('miniTime')
+            airqValue: document.getElementById('airqValue'), activityValue: document.getElementById('activityValue'), stressValue: document.getElementById('stressValue'), result: document.getElementById('result'), emojiResult: document.getElementById('emojiResult'), advice: document.getElementById('advice'), tips: document.getElementById('tips'), tipsList: document.getElementById('tipsList'), graphCanvas: document.getElementById('graphCanvas'), historyTable: document.getElementById('historyTable'), chatBox: document.getElementById('chatBox'), chatInput: document.getElementById('chatInput'), gaugeScore: document.getElementById('gaugeScore'), gaugeLabel: document.getElementById('gaugeLabel'), gaugeSummary: document.getElementById('gaugeSummary'), gaugeProgress: document.getElementById('gaugeProgress'), miniStatus: document.getElementById('miniStatus'), miniTrend: document.getElementById('miniTrend'), miniTime: document.getElementById('miniTime'), useLocationBtn: document.getElementById('useLocationBtn'), locationStatus: document.getElementById('locationStatus')
         };
         const aiMemory = { conversationHistory: [], learnedTriggers: [], riskTrends: { improving: false, worsening: false }, userGoals: [], suggestedActions: [] };
 
@@ -1248,6 +1285,7 @@
             document.getElementById('clearDataBtn').addEventListener('click', clearAllData);
             document.getElementById('clearBtn').addEventListener('click', clearAllData);
             document.getElementById('sendChatBtn').addEventListener('click', handleChat);
+            refs.useLocationBtn.addEventListener('click', loadLocalConditions);
             refs.chatInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') handleChat(); });
             window.addEventListener('resize', drawGraph);
         }
@@ -1273,6 +1311,42 @@
             }
         }
         function readInputs() { return { temp: Number(refs.temp.value || 0), humidity: Number(refs.humidity.value || 0), airq: Number(refs.airq.value || 3), activity: Number(refs.activity.value || 2), stress: Number(refs.stress.value || 2) }; }
+        function setLocationStatus(message, isError = false) { refs.locationStatus.textContent = message; refs.locationStatus.style.color = isError ? '#ffb3b3' : '#bfe8c5'; }
+        function applyEnvironment(environment) {
+            refs.temp.value = environment.weather.temperature;
+            refs.humidity.value = environment.weather.humidity;
+            refs.airq.value = Math.max(0, Math.min(500, Math.round(environment.airQuality.usAqi)));
+            refs.airqValue.textContent = refs.airq.value;
+            state.environment = environment;
+            updateLivePreview();
+            const { description, temperature, humidity } = environment.weather;
+            setLocationStatus(`${description} • ${temperature}°C • ${humidity}% humidity • AQI ${Math.round(environment.airQuality.usAqi)} • ${environment.location.timezone}`);
+        }
+        function getCurrentPosition() {
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) { reject(new Error('Geolocation is not supported on this device.')); return; }
+                navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
+            });
+        }
+        async function loadLocalConditions() {
+            refs.useLocationBtn.classList.add('loading');
+            refs.useLocationBtn.textContent = 'Loading conditions...';
+            setLocationStatus('Requesting location permission...');
+            try {
+                const position = await getCurrentPosition();
+                const params = new URLSearchParams({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+                const response = await fetch(`/api/environment?${params}`);
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Unable to load local conditions.');
+                applyEnvironment(data);
+            } catch (error) {
+                const message = error.code === 1 ? 'Location permission was denied. You can continue with manual values.' : error.message;
+                setLocationStatus(message, true);
+            } finally {
+                refs.useLocationBtn.classList.remove('loading');
+                refs.useLocationBtn.textContent = 'Use my location';
+            }
+        }
         function validateInputs(inputs) {
             const result = validateHumanEnvironmentalInputs(inputs);
             return result.valid ? [] : result.errors;
@@ -1323,6 +1397,9 @@ Risk details:
 - Stress level: ${inputs.stress}/100
 - Main trigger: ${primaryFactor}
 - Recent trend: ${trend.label} (${trend.detail})
+${state.environment ? `- Location source: Open-Meteo (${state.environment.location.latitude.toFixed(4)}, ${state.environment.location.longitude.toFixed(4)})
+- Weather: ${state.environment.weather.description}, apparent temperature ${state.environment.weather.apparentTemperature}°C, wind ${state.environment.weather.windSpeed} km/h, precipitation ${state.environment.weather.precipitation} mm
+- Air measurements: PM2.5 ${state.environment.airQuality.pm2_5 ?? 'unknown'} µg/m³, PM10 ${state.environment.airQuality.pm10 ?? 'unknown'} µg/m³, ozone ${state.environment.airQuality.ozone ?? 'unknown'} µg/m³` : '- Weather source: manually entered values'}
 
 Suggested actions:
 - ${tips.join('\n- ')}

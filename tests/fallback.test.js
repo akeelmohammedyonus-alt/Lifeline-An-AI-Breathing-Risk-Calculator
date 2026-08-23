@@ -4,6 +4,7 @@ import { generateLocalFallbackReply, createMessages } from '../server/controller
 import { getAiProviderSettings } from '../config/env.js';
 import { validateHumanEnvironmentalInputs } from '../src/validation/environmentValidation.js';
 import { calculateRiskScore } from '../src/risk/riskScoring.js';
+import { describeWeatherCode, parseCoordinate } from '../server/controllers/environmentController.js';
 
 test('returns safety-focused guidance for breathing symptoms', () => {
     const reply = generateLocalFallbackReply('I am wheezing and short of breath', []);
@@ -43,4 +44,16 @@ test('accepts the full allowed temperature range from -15°C to 45°C', () => {
 
     assert.equal(low.valid, true);
     assert.equal(high.valid, true);
+});
+
+test('validates geolocation coordinates for Open-Meteo', () => {
+    assert.equal(parseCoordinate('-36.8485', 'latitude', -90, 90), -36.8485);
+    assert.throws(() => parseCoordinate('91', 'latitude', -90, 90), /latitude/);
+    assert.throws(() => parseCoordinate('west', 'longitude', -180, 180), /longitude/);
+});
+
+test('describes common Open-Meteo weather codes', () => {
+    assert.equal(describeWeatherCode(0), 'Clear sky');
+    assert.equal(describeWeatherCode(61), 'Light rain');
+    assert.equal(describeWeatherCode(999), 'Variable conditions');
 });
