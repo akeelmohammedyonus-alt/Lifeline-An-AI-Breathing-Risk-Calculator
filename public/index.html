@@ -221,6 +221,7 @@
             margin-top: 24px;
             display: grid;
             gap: 18px;
+            min-width: 0;
         }
 
         .weather-guide {
@@ -284,6 +285,7 @@
             background: linear-gradient(120deg, rgba(16, 25, 41, 0.95), rgba(10, 18, 31, 0.9));
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
+            min-width: 0;
         }
 
         .edu-grid {
@@ -338,6 +340,7 @@
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 16px;
+            min-width: 0;
         }
 
         .illness-card {
@@ -347,17 +350,42 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
             display: grid;
             gap: 10px;
+            min-width: 0;
         }
 
         .illness-card h4 {
             color: #dff7e0;
             margin-bottom: 2px;
+            font-size: 1rem;
+            line-height: 1.3;
+            overflow-wrap: anywhere;
         }
 
-        .illness-card ul {
+        .illness-card p,
+        .illness-card > ul:not(.resource-list),
+        .illness-card > ul:not(.resource-list) li {
+            color: #c2d8d0;
+            font-size: 0.86rem;
+            line-height: 1.6;
+        }
+
+        .illness-card p {
+            margin: 0;
+        }
+
+        .illness-card strong {
+            color: #f2f8ed;
+            font-weight: 700;
+        }
+
+        .illness-card > ul:not(.resource-list) {
             padding-left: 18px;
             display: grid;
             gap: 6px;
+        }
+
+        .illness-card > ul:not(.resource-list) li::marker {
+            color: var(--accent);
         }
 
         .resource-list {
@@ -368,10 +396,14 @@
         }
 
         .resource-list a {
-            color: #a8e4ff;
+            color: #8fe4d0;
             text-decoration: none;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 3px;
+            overflow-wrap: anywhere;
         }
 
+        .resource-list a:focus-visible,
         .resource-list a:hover {
             text-decoration: underline;
         }
@@ -1062,8 +1094,11 @@
             }
 
             .edu-grid,
-            .diagram {
-                grid-template-columns: 1fr;
+            .diagram,
+            .illness-grid {
+                grid-template-columns: minmax(0, 1fr);
+                width: 100%;
+                min-width: 0;
             }
 
             .weather-guide-header {
@@ -1080,6 +1115,10 @@
             .edu-card p,
             .edu-card li {
                 font-size: 0.9rem;
+            }
+
+            .illness-card h4 {
+                font-size: 1rem;
             }
 
             table,
@@ -1144,6 +1183,21 @@
 
             .weather-guide-grid {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        @media screen and (max-width: 760px) {
+            .education-section,
+            .edu-hero,
+            .illness-grid,
+            .illness-card {
+                width: 100%;
+                max-width: 100%;
+                min-width: 0;
+            }
+
+            .illness-grid {
+                grid-template-columns: minmax(0, 1fr) !important;
             }
         }
     </style>
