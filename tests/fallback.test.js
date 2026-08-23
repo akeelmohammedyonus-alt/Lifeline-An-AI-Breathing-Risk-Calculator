@@ -26,6 +26,27 @@ test('supports switching between OpenAI and local Ollama providers', () => {
     assert.ok(createMessages([], 'hello').length >= 2);
 });
 
+test('passes the complete assessment scope to Smart AI messages', () => {
+    const messages = createMessages([], 'Analyze my current breathing risk', {
+        temperatureC: 20,
+        humidityPercent: 55,
+        airQualityIndex: 120,
+        activityLevel: 4,
+        activityScale: '1-5',
+        stressLevel: 75,
+        stressScale: '0-100',
+        calculatedRiskScore: 4.1,
+        riskBand: 'elevated',
+        dataSource: 'Manual inputs'
+    });
+
+    assert.match(messages.at(-1).content, /temperatureC/);
+    assert.match(messages.at(-1).content, /airQualityIndex/);
+    assert.match(messages.at(-1).content, /activityScale/);
+    assert.match(messages.at(-1).content, /stressScale/);
+    assert.match(messages.at(-1).content, /calculatedRiskScore/);
+});
+
 test('accepts real AQI and stress ranges without invalidating the assessment', () => {
     const validation = validateHumanEnvironmentalInputs({
         temp: 20,
@@ -36,6 +57,12 @@ test('accepts real AQI and stress ranges without invalidating the assessment', (
 
     assert.equal(validation.valid, true);
     assert.ok(calculateRiskScore({ temp: 20, humidity: 55, airq: 120, activity: 2, stress: 75 }) > 0);
+});
+
+test('classifies hazardous AQI as critical even when other inputs are calm', () => {
+    const risk = calculateRiskScore({ temp: 20, humidity: 55, airq: 500, activity: 1, stress: 0 });
+
+    assert.equal(risk, 8);
 });
 
 test('accepts the full allowed temperature range from -15°C to 45°C', () => {

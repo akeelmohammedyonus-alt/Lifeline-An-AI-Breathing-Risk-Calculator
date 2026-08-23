@@ -8,11 +8,11 @@ export function calculateRiskScore(inputs = {}) {
   if (temp < 10) risk += 1.4;
   if (temp > 28) risk += 1.0;
 
-  if (airq >= 301) risk += 3.2;
-  else if (airq >= 201) risk += 2.8;
-  else if (airq >= 151) risk += 2.2;
-  else if (airq >= 101) risk += 1.5;
-  else if (airq >= 51) risk += 0.8;
+  if (airq >= 301) risk += 8.0;
+  else if (airq >= 201) risk += 6.0;
+  else if (airq >= 151) risk += 4.5;
+  else if (airq >= 101) risk += 2.5;
+  else if (airq >= 51) risk += 1.0;
 
   if (activity >= 4) risk += 1.7;
   if (stress >= 76) risk += 2.4;

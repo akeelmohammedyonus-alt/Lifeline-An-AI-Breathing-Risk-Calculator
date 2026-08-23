@@ -8,6 +8,11 @@
     <title>LifeLine 2.0 – AI Breathing Risk Assistant</title>
     <link rel="icon" href="./images/image.png" />
     <style>
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 16px;
+        }
+
         :root {
             --bg: #081b22;
             --bg-2: #123b3c;
@@ -30,13 +35,22 @@
         }
 
         body {
-            font-family: 'Avenir Next', 'Trebuchet MS', sans-serif;
+            font-family: 'Avenir Next', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             color: var(--text);
             min-height: 100vh;
             padding: 20px;
             overflow-x: hidden;
             background: radial-gradient(circle at 14% 8%, rgba(158, 211, 106, 0.16), transparent 25%), radial-gradient(circle at 88% 86%, rgba(93, 209, 189, 0.16), transparent 30%), linear-gradient(135deg, var(--bg) 0%, var(--bg-2) 55%, #0a242b 100%);
             position: relative;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
         }
 
         body::before,
@@ -207,6 +221,61 @@
             margin-top: 24px;
             display: grid;
             gap: 18px;
+        }
+
+        .weather-guide {
+            margin-top: 24px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: rgba(7, 28, 32, 0.78);
+            box-shadow: var(--shadow);
+        }
+
+        .weather-guide-header {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 14px;
+        }
+
+        .weather-guide-header h2 {
+            color: #d2f29b;
+            font-size: 1.25rem;
+        }
+
+        .weather-guide-header p {
+            max-width: 560px;
+            color: var(--muted);
+            font-size: 0.84rem;
+            line-height: 1.5;
+        }
+
+        .weather-guide-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .weather-guide-item {
+            min-height: 150px;
+            padding: 14px;
+            border: 1px solid rgba(160, 218, 177, 0.16);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .weather-guide-item h3 {
+            margin-bottom: 7px;
+            color: #dff7e0;
+            font-size: 0.9rem;
+        }
+
+        .weather-guide-item p {
+            color: var(--muted);
+            font-size: 0.78rem;
+            line-height: 1.55;
         }
 
         .edu-hero {
@@ -997,6 +1066,15 @@
                 grid-template-columns: 1fr;
             }
 
+            .weather-guide-header {
+                display: grid;
+                align-items: start;
+            }
+
+            .weather-guide-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
             .illness-card ul,
             .illness-card p,
             .edu-card p,
@@ -1046,6 +1124,26 @@
 
             .chat-msg {
                 font-size: 0.86rem;
+            }
+
+            body {
+                font-size: 16px;
+                line-height: 1.45;
+            }
+
+            input[type="number"],
+            input[type="text"],
+            button {
+                -webkit-appearance: none;
+                appearance: none;
+            }
+
+            .weather-guide {
+                padding: 14px;
+            }
+
+            .weather-guide-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -1109,7 +1207,7 @@
         </section>
 
         <section class="layout">
-            <div class="card">
+            <div class="card" id="riskAssessmentCard">
                 <div class="card-title">🫁 Risk assessment</div>
                 <div class="location-panel">
                     <h3>Live weather</h3>
@@ -1187,6 +1285,34 @@
                     <h4>💡 Health tips</h4>
                     <ul id="tipsList"></ul>
                 </div>
+            </div>
+        </section>
+
+        <section class="weather-guide" aria-labelledby="weatherGuideTitle">
+            <div class="weather-guide-header">
+                <div>
+                    <div class="card-title">Weather and breathing</div>
+                    <h2 id="weatherGuideTitle">How conditions can affect respiratory illness</h2>
+                </div>
+                <p>Weather is one possible trigger, not a diagnosis. Individual responses vary, so follow your clinician’s action plan and monitor symptoms.</p>
+            </div>
+            <div class="weather-guide-grid">
+                <article class="weather-guide-item">
+                    <h3>Asthma</h3>
+                    <p>Cold, dry air, thunderstorms, pollen, smoke, and sudden weather changes may irritate sensitive airways. Warm up gradually and reduce exposure to known triggers.</p>
+                </article>
+                <article class="weather-guide-item">
+                    <h3>COPD</h3>
+                    <p>Cold air, heat, high humidity, and poor air quality can make breathing harder. Plan activity during milder conditions and avoid polluted outdoor air.</p>
+                </article>
+                <article class="weather-guide-item">
+                    <h3>Allergies</h3>
+                    <p>Warm, windy days can spread pollen, while damp conditions may support mould. Check local pollen and air-quality conditions before spending extended time outdoors.</p>
+                </article>
+                <article class="weather-guide-item">
+                    <h3>Respiratory infections</h3>
+                    <p>Cold, dry weather can worsen irritation, and crowded indoor spaces may increase infection exposure. Rest, hydrate, and seek medical advice if symptoms worsen.</p>
+                </article>
             </div>
         </section>
 
@@ -1409,7 +1535,7 @@
             refs.stress.addEventListener('input', (event) => { refs.stressValue.textContent = event.target.value; updateLivePreview(); });
             [refs.temp, refs.humidity].forEach((input) => input.addEventListener('input', updateLivePreview));
             document.getElementById('calculateBtn').addEventListener('click', calculateRisk);
-            document.getElementById('runAssessmentBtn').addEventListener('click', calculateRisk);
+            document.getElementById('runAssessmentBtn').addEventListener('click', scrollToRiskAssessment);
             document.getElementById('clearDataBtn').addEventListener('click', clearAllData);
             document.getElementById('clearBtn').addEventListener('click', clearAllData);
             document.getElementById('sendChatBtn').addEventListener('click', handleChat);
@@ -1439,6 +1565,11 @@
             }
         }
         function readInputs() { return { temp: Number(refs.temp.value || 0), humidity: Number(refs.humidity.value || 0), airq: Number(refs.airq.value || 3), activity: Number(refs.activity.value || 2), stress: Number(refs.stress.value || 2) }; }
+        function scrollToRiskAssessment() {
+            const panel = document.getElementById('riskAssessmentCard');
+            panel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            window.setTimeout(() => refs.temp.focus({ preventScroll: true }), 450);
+        }
         function setLocationStatus(message, isError = false) { refs.locationStatus.textContent = message; refs.locationStatus.style.color = isError ? '#ffb3b3' : '#bfe8c5'; }
         function applyEnvironment(environment) {
             refs.temp.value = environment.weather.temperature;
@@ -1532,7 +1663,7 @@ Risk details:
 - Temperature: ${inputs.temp}°C
 - Humidity: ${inputs.humidity}%
 - Air quality: ${inputs.airq} AQI
-- Activity level: ${inputs.activity}/10
+- Activity level: ${inputs.activity}/5
 - Stress level: ${inputs.stress}/100
 - Main trigger: ${primaryFactor}
 - Recent trend: ${trend.label} (${trend.detail})
@@ -1552,8 +1683,20 @@ Please respond with:
 
         async function sendRiskAnalysisToAI(inputs, risk) {
             const prompt = buildRiskAnalysisPrompt(inputs, risk);
+            const assessment = {
+                temperatureC: inputs.temp,
+                humidityPercent: inputs.humidity,
+                airQualityIndex: inputs.airq,
+                activityLevel: inputs.activity,
+                activityScale: '1-5',
+                stressLevel: inputs.stress,
+                stressScale: '0-100',
+                calculatedRiskScore: risk,
+                riskBand: getRiskBand(risk),
+                dataSource: state.environment ? 'Open-Meteo plus manual activity and stress' : 'Manual inputs'
+            };
             try {
-                const reply = await fetchAIReply(prompt);
+                const reply = await fetchAIReply(prompt, assessment);
                 addChat('ai', reply);
             } catch (error) {
                 console.error('Risk analysis API call failed:', error);
@@ -1666,12 +1809,12 @@ Please respond with:
         function formatChatText(text) { const escapeHtml = (value) => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); const formatInline = (value) => escapeHtml(value).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>'); const blocks = String(text || '').split(/\n\s*\n/).map((block) => block.trim()).filter(Boolean); return blocks.map((block) => { const lines = block.split(/\n/).map((line) => line.trim()).filter(Boolean); const isList = lines.every((line) => /^([-*•]|\d+\.)\s+/.test(line)); if (isList) { const items = lines.map((line) => { const content = line.replace(/^([-*•]|\d+\.)\s+/, ''); return `<li>${formatInline(content)}</li>`; }); return `<ul>${items.join('')}</ul>`; } return `<p>${lines.map((line) => formatInline(line)).join('<br>')}</p>`; }).join(''); }
         function addChat(type, text) { const message = document.createElement('div'); message.className = `chat-msg ${type}`; message.innerHTML = `<b>${type === 'user' ? 'You' : 'LifeLine AI'}:</b> ${formatChatText(text)}`; refs.chatBox.appendChild(message); refs.chatBox.scrollTop = refs.chatBox.scrollHeight; }
         async function handleChat() { const value = refs.chatInput.value.trim(); if (!value) return; addChat('user', value); const sendButton = document.getElementById('sendChatBtn'); sendButton.classList.add('loading'); try { const reply = await fetchAIReply(value); addChat('ai', reply); state.conversationContext.push({ user: value, ai: reply }); } catch (error) { console.error(error); addChat('ai', `⚠️ AI service unavailable. Using a local response:\n\n${generateSmartAIReply(value.toLowerCase())}`); } finally { sendButton.classList.remove('loading'); refs.chatInput.value = ''; } }
-        async function fetchAIReply(input) { const response = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: input, history: state.conversationContext }) }); if (!response.ok) throw new Error(`AI server error: ${response.status}`); const data = await response.json(); return data.reply || 'Sorry, I could not produce a response.'; }
+        async function fetchAIReply(input, assessment = null) { const response = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: input, history: state.conversationContext, assessment }) }); if (!response.ok) throw new Error(`AI server error: ${response.status}`); const data = await response.json(); return data.reply || 'Sorry, I could not produce a response.'; }
         function generateContextAwareReply(inputs, risk) { state.userProfile.lastAssessment = { ...inputs, risk, timestamp: new Date() }; const trends = analyzeRiskTrends(); const primaryFactor = getPrimaryFactor(inputs); let response = ''; if (risk >= 7.5) response = `🔴 High concern detected\n\nYour breathing risk is ${risk.toFixed(1)}/10. The strongest factor is ${primaryFactor}.\n\n• Reduce exertion and avoid extended outdoor time\n• Use calming, steady breathing and keep your environment stable\n• Seek medical support if symptoms worsen`; else if (risk >= 4.5) response = `🟡 Elevated risk\n\nYour breathing environment is drifting into a less comfortable range, especially around ${primaryFactor}.\n\n• Pace movement and monitor your symptoms\n• Improve airflow or hydration if needed\n• Keep an eye on trends over the next few checks`; else response = `🟢 Comfortable conditions\n\nYour breathing risk remains low at ${risk.toFixed(1)}/10. This is a good window to stay calm and steady.\n\n• Continue monitoring your environment\n• Keep hydration and rest consistent\n• Enjoy manageable conditions while they last`; if (trends && trends.trend === 'worsening') response += `\n\n⚠️ Your recent trend is worsening, so it may be wise to reassess soon.`; return response; }
         function getPrimaryFactor(inputs) { const { humidity, airq, activity, stress, temp } = inputs; if (humidity > 70 || humidity < 30) return 'humidity'; if (airq >= 101) return 'air quality'; if (activity >= 4) return 'activity level'; if (stress >= 76) return 'stress'; if (temp < 10 || temp > 28) return 'temperature'; return 'overall balance'; }
         function generateSmartAIReply(query) { const lower = query.toLowerCase(); if (lower.includes('humidity')) return 'Humidity influences how easily the air feels to breathe. Aim for a balanced range and adjust indoors when it becomes extreme.'; if (lower.includes('stress')) return 'Stress often makes breathing feel more shallow. A slow 4-6 breathing pattern can help you settle quickly.'; if (lower.includes('exercise')) return 'Warm up gently, avoid high exertion in poor air, and take breaks if your breathing feels strained.'; if (lower.includes('air')) return 'Air quality matters a lot. Reduce outdoor activity when pollution or allergens are high.'; return 'I can help with humidity, air quality, temperature, exercise, stress, or your risk trend. Ask me about any of them.'; }
         function clearAllData() { if (!confirm('Clear all saved assessments and start fresh?')) return; state.riskHistory = []; state.lastRisk = 0; localStorage.removeItem('lifelineRiskHistory'); localStorage.removeItem('lifelineUserProfile'); refs.historyTable.innerHTML = ''; refs.result.innerHTML = 'Your breathing profile will appear here.'; refs.emojiResult.textContent = '💙'; refs.advice.style.display = 'none'; refs.tips.style.display = 'none'; refs.tipsList.innerHTML = ''; drawGraph(); addChat('ai', '✨ Data cleared. The assistant is ready for a fresh assessment.'); }
-        function initialize() { bindEvents(); updateLivePreview(); loadData(); drawGraph(); addChat('ai', '👋 Hello! I can help you assess breathing conditions, explain your risk, and suggest calm, practical next steps.'); }
+        function initialize() { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; window.scrollTo(0, 0); bindEvents(); updateLivePreview(); loadData(); drawGraph(); addChat('ai', '👋 Hello! I can help you assess breathing conditions, explain your risk, and suggest calm, practical next steps.'); }
         initialize();
     </script>
 </body>

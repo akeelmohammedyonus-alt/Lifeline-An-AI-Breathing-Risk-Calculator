@@ -3,7 +3,8 @@ import { config } from '../../config/env.js';
 
 const openai = new OpenAI({ apiKey: config.openAiApiKey });
 
-function createMessages(history, message) {
+function createMessages(history, message, assessment = null) {
+    const assessmentContext = assessment ? `\n\nStructured assessment data (use every field; activity is scored 1-5 and stress 0-100):\n${JSON.stringify(assessment)}` : '';
     return [
         {
             role: 'system',
@@ -13,7 +14,7 @@ function createMessages(history, message) {
             { role: 'user', content: item.user },
             { role: 'assistant', content: item.ai }
         ]),
-        { role: 'user', content: message }
+        { role: 'user', content: `${message}${assessmentContext}` }
     ];
 }
 
@@ -144,10 +145,10 @@ function generateLocalFallbackReply(message, history = []) {
 }
 
 async function chatHandler(req, res) {
-    const { message = '', history = [] } = req.body || {};
+    const { message = '', history = [], assessment = null } = req.body || {};
 
     try {
-        const messages = createMessages(history, message);
+        const messages = createMessages(history, message, assessment);
         const reply = config.isOllama ? await getOllamaReply(messages) : await getOpenAIReply(messages);
         res.json({ reply, provider: config.provider });
     } catch (error) {
