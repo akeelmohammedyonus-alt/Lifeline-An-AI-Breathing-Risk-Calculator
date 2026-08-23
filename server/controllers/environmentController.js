@@ -1,5 +1,10 @@
+import dns from 'node:dns';
+import https from 'node:https';
+
 const OPEN_METEO_WEATHER_URL = 'https://api.open-meteo.com/v1/forecast';
 const OPEN_METEO_AIR_URL = 'https://air-quality-api.open-meteo.com/v1/air-quality';
+
+dns.setDefaultResultOrder('ipv4first');
 
 function parseCoordinate(value, name, minimum, maximum) {
     const coordinate = Number(value);
@@ -43,11 +48,41 @@ function describeWeatherCode(code) {
 }
 
 async function fetchJson(url) {
-    const response = await fetch(url, { headers: { Accept: 'application/json' } });
-    if (!response.ok) {
-        throw new Error(`Open-Meteo request failed with status ${response.status}`);
+    let lastError;
+
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+            return await requestJson(url);
+        } catch (error) {
+            lastError = error;
+        }
     }
-    return response.json();
+
+    throw new Error(`Open-Meteo is unreachable: ${lastError?.message || 'request failed'}`);
+}
+
+function requestJson(url) {
+    return new Promise((resolve, reject) => {
+        const request = https.get(url, { family: 4, headers: { Accept: 'application/json' } }, (response) => {
+            let body = '';
+            response.setEncoding('utf8');
+            response.on('data', (chunk) => { body += chunk; });
+            response.on('end', () => {
+                if (response.statusCode < 200 || response.statusCode >= 300) {
+                    reject(new Error(`Open-Meteo request failed with status ${response.statusCode}`));
+                    return;
+                }
+                try {
+                    resolve(JSON.parse(body));
+                } catch {
+                    reject(new Error('Open-Meteo returned invalid JSON'));
+                }
+            });
+        });
+
+        request.setTimeout(12000, () => request.destroy(new Error('request timed out')));
+        request.on('error', reject);
+    });
 }
 
 async function getEnvironment(latitudeValue, longitudeValue) {

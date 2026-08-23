@@ -433,6 +433,7 @@
             display: grid;
             grid-template-columns: 1.02fr 0.98fr 1fr;
             gap: 16px;
+            align-items: stretch;
         }
 
         .card {
@@ -445,6 +446,15 @@
             backdrop-filter: blur(15px);
             box-shadow: var(--shadow);
             animation: fadeUp 0.9s ease both;
+        }
+
+        .layout > .card {
+            height: 100%;
+        }
+
+        .layout > .card:last-child {
+            display: flex;
+            flex-direction: column;
         }
 
         .card::before {
@@ -574,6 +584,95 @@
             background: rgba(57, 167, 255, 0.08);
         }
 
+        .manual-input-panel {
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(76, 175, 80, 0.22);
+            border-radius: 14px;
+            background: rgba(76, 175, 80, 0.07);
+        }
+
+        .manual-input-panel h3 {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: #dff7e0;
+        }
+
+        .manual-input-panel p {
+            margin-bottom: 12px;
+            color: var(--muted);
+            font-size: 0.8rem;
+            line-height: 1.45;
+        }
+
+        .weather-widget {
+            display: grid;
+            gap: 10px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .weather-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .weather-temperature {
+            font-size: 1.8rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .weather-description {
+            color: #dceeff;
+            font-size: 0.82rem;
+            margin-top: 5px;
+        }
+
+        .weather-aqi {
+            min-width: 82px;
+            padding: 8px;
+            border-radius: 10px;
+            background: rgba(76, 175, 80, 0.14);
+            color: #dff7e0;
+            text-align: center;
+            font-size: 0.75rem;
+        }
+
+        .weather-aqi strong {
+            display: block;
+            font-size: 1.15rem;
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 7px;
+        }
+
+        .weather-detail {
+            padding: 8px;
+            border-radius: 9px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--muted);
+            font-size: 0.72rem;
+        }
+
+        .weather-detail strong {
+            display: block;
+            color: var(--text);
+            font-size: 0.85rem;
+            margin-top: 3px;
+        }
+
+        .weather-attribution {
+            color: var(--muted);
+            font-size: 0.68rem;
+        }
+
         .location-panel h3 {
             margin-bottom: 5px;
             font-size: 0.9rem;
@@ -655,7 +754,8 @@
         }
 
         .chat-box {
-            height: 260px;
+            flex: 1 1 auto;
+            min-height: 260px;
             overflow-y: auto;
             padding: 10px;
             border-radius: 14px;
@@ -883,6 +983,10 @@
                 height: 260px;
             }
 
+            .weather-details {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
             .edu-grid,
             .diagram {
                 grid-template-columns: 1fr;
@@ -1003,26 +1107,45 @@
             <div class="card">
                 <div class="card-title">🫁 Risk assessment</div>
                 <div class="location-panel">
-                    <h3>Local conditions</h3>
+                    <h3>Live weather</h3>
                     <p>Use your device location to load current weather and air quality from Open-Meteo.</p>
                     <button class="btn-secondary" id="useLocationBtn" type="button">Use my location</button>
                     <div id="locationStatus" role="status" aria-live="polite">Manual values are ready.</div>
+                    <div class="weather-widget" id="weatherWidget" hidden>
+                        <div class="weather-main">
+                            <div>
+                                <div class="weather-temperature" id="weatherTemperature">--</div>
+                                <div class="weather-description" id="weatherDescription">Current conditions</div>
+                            </div>
+                            <div class="weather-aqi"><strong id="weatherAqi">--</strong>AQI</div>
+                        </div>
+                        <div class="weather-details">
+                            <div class="weather-detail">Humidity<strong id="weatherHumidity">--</strong></div>
+                            <div class="weather-detail">Feels like<strong id="weatherFeelsLike">--</strong></div>
+                            <div class="weather-detail">Wind<strong id="weatherWind">--</strong></div>
+                        </div>
+                        <div class="weather-attribution">Open-Meteo current conditions</div>
+                    </div>
                 </div>
-                <div class="field-group"><label for="temp">Temperature (°C)</label><input id="temp" type="number"
+                <div class="manual-input-panel">
+                    <h3>Manual inputs</h3>
+                    <p>Adjust these values when you want to test a different scenario.</p>
+                    <div class="field-group"><label for="temp">Temperature (°C)</label><input id="temp" type="number"
                         placeholder="-15 - 45" min="-15" max="45" value="20"></div>
-                <div class="field-group"><label for="humidity">Humidity (%)</label><input id="humidity" type="number"
+                    <div class="field-group"><label for="humidity">Humidity (%)</label><input id="humidity" type="number"
                         placeholder="0 - 100" min="0" max="100" value="55"></div>
-                <div class="field-group"><label for="airq">AQI (0-500)</label><input id="airq" type="range" min="0"
+                    <div class="field-group"><label for="airq">AQI (0-500)</label><input id="airq" type="range" min="0"
                         max="500" value="150">
-                    <div class="range-row"><span>clean</span><strong id="airqValue">150</strong><span>poor</span></div>
-                </div>
-                <div class="field-group"><label for="activity">Activity level</label><input id="activity" type="range"
+                        <div class="range-row"><span>clean</span><strong id="airqValue">150</strong><span>poor</span></div>
+                    </div>
+                    <div class="field-group"><label for="activity">Activity level</label><input id="activity" type="range"
                         min="1" max="5" value="2">
-                    <div class="range-row"><span>low</span><strong id="activityValue">2</strong><span>high</span></div>
-                </div>
-                <div class="field-group"><label for="stress">Stress level (0-100)</label><input id="stress" type="range" min="0"
+                        <div class="range-row"><span>low</span><strong id="activityValue">2</strong><span>high</span></div>
+                    </div>
+                    <div class="field-group"><label for="stress">Stress level (0-100)</label><input id="stress" type="range" min="0"
                         max="100" value="35">
-                    <div class="range-row"><span>rest</span><strong id="stressValue">35</strong><span>high</span></div>
+                        <div class="range-row"><span>rest</span><strong id="stressValue">35</strong><span>high</span></div>
+                    </div>
                 </div>
                 <button class="btn-primary" id="calculateBtn" type="button">Analyze risk</button>
                 <div class="status-card">
@@ -1271,7 +1394,7 @@
         const state = { riskHistory: [], lastRisk: 0, conversationContext: [], environment: null, userProfile: { triggers: [], preferences: {}, riskPatterns: [], conversationCount: 0, lastAssessment: null } };
         const refs = {
             temp: document.getElementById('temp'), humidity: document.getElementById('humidity'), airq: document.getElementById('airq'), activity: document.getElementById('activity'), stress: document.getElementById('stress'),
-            airqValue: document.getElementById('airqValue'), activityValue: document.getElementById('activityValue'), stressValue: document.getElementById('stressValue'), result: document.getElementById('result'), emojiResult: document.getElementById('emojiResult'), advice: document.getElementById('advice'), tips: document.getElementById('tips'), tipsList: document.getElementById('tipsList'), graphCanvas: document.getElementById('graphCanvas'), historyTable: document.getElementById('historyTable'), chatBox: document.getElementById('chatBox'), chatInput: document.getElementById('chatInput'), gaugeScore: document.getElementById('gaugeScore'), gaugeLabel: document.getElementById('gaugeLabel'), gaugeSummary: document.getElementById('gaugeSummary'), gaugeProgress: document.getElementById('gaugeProgress'), miniStatus: document.getElementById('miniStatus'), miniTrend: document.getElementById('miniTrend'), miniTime: document.getElementById('miniTime'), useLocationBtn: document.getElementById('useLocationBtn'), locationStatus: document.getElementById('locationStatus')
+            airqValue: document.getElementById('airqValue'), activityValue: document.getElementById('activityValue'), stressValue: document.getElementById('stressValue'), result: document.getElementById('result'), emojiResult: document.getElementById('emojiResult'), advice: document.getElementById('advice'), tips: document.getElementById('tips'), tipsList: document.getElementById('tipsList'), graphCanvas: document.getElementById('graphCanvas'), historyTable: document.getElementById('historyTable'), chatBox: document.getElementById('chatBox'), chatInput: document.getElementById('chatInput'), gaugeScore: document.getElementById('gaugeScore'), gaugeLabel: document.getElementById('gaugeLabel'), gaugeSummary: document.getElementById('gaugeSummary'), gaugeProgress: document.getElementById('gaugeProgress'), miniStatus: document.getElementById('miniStatus'), miniTrend: document.getElementById('miniTrend'), miniTime: document.getElementById('miniTime'), useLocationBtn: document.getElementById('useLocationBtn'), locationStatus: document.getElementById('locationStatus'), weatherWidget: document.getElementById('weatherWidget'), weatherTemperature: document.getElementById('weatherTemperature'), weatherDescription: document.getElementById('weatherDescription'), weatherAqi: document.getElementById('weatherAqi'), weatherHumidity: document.getElementById('weatherHumidity'), weatherFeelsLike: document.getElementById('weatherFeelsLike'), weatherWind: document.getElementById('weatherWind')
         };
         const aiMemory = { conversationHistory: [], learnedTriggers: [], riskTrends: { improving: false, worsening: false }, userGoals: [], suggestedActions: [] };
 
@@ -1321,6 +1444,13 @@
             updateLivePreview();
             const { description, temperature, humidity } = environment.weather;
             setLocationStatus(`${description} • ${temperature}°C • ${humidity}% humidity • AQI ${Math.round(environment.airQuality.usAqi)} • ${environment.location.timezone}`);
+            refs.weatherWidget.hidden = false;
+            refs.weatherTemperature.textContent = `${temperature}°C`;
+            refs.weatherDescription.textContent = description;
+            refs.weatherAqi.textContent = Math.round(environment.airQuality.usAqi);
+            refs.weatherHumidity.textContent = `${humidity}%`;
+            refs.weatherFeelsLike.textContent = `${environment.weather.apparentTemperature}°C`;
+            refs.weatherWind.textContent = `${environment.weather.windSpeed} km/h`;
         }
         function getCurrentPosition() {
             return new Promise((resolve, reject) => {
@@ -1339,8 +1469,12 @@
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Unable to load local conditions.');
                 applyEnvironment(data);
+                await calculateRisk({ announceAi: true });
+                setLocationStatus('Conditions loaded. Risk calculated and Smart AI analysis is ready below.');
             } catch (error) {
-                const message = error.code === 1 ? 'Location permission was denied. You can continue with manual values.' : error.message;
+                const message = error.code === 1
+                    ? 'Location permission was denied. You can continue with manual values.'
+                    : error.message || 'Unable to load local conditions. Check your connection and try again.';
                 setLocationStatus(message, true);
             } finally {
                 refs.useLocationBtn.classList.remove('loading');
@@ -1385,7 +1519,7 @@
             const trend = getTrendSummary();
             const primaryFactor = getPrimaryFactor(inputs);
 
-            return `Analyze this breathing risk assessment and give a clear, safe response.
+            return `Analyze this environmental asthma-risk assessment and give a clear, safe, non-diagnostic response. Do not claim to diagnose asthma or predict an attack. Explain how the current conditions may affect breathing and what cautious next step is appropriate.
 
 Risk details:
 - Risk score: ${risk.toFixed(1)}/10
@@ -1422,14 +1556,18 @@ Please respond with:
             }
         }
 
-        function calculateRisk() {
+        async function calculateRisk(options = {}) {
             const inputs = readInputs(); const errors = validateInputs(inputs); if (errors.length) { refs.result.innerHTML = `<span class="error">⚠️ ${errors.join(', ')}</span>`; return; }
             const risk = calculateRiskScore(inputs); state.lastRisk = risk; const band = getBandMeta(risk);
             refs.result.innerHTML = `<strong>${band.label}</strong><br>Score: ${risk.toFixed(1)}/10`; refs.emojiResult.textContent = band.emoji; refs.gaugeScore.textContent = risk.toFixed(1); refs.gaugeLabel.textContent = band.label; refs.gaugeSummary.textContent = band.summary; refs.gaugeProgress.style.stroke = band.color; refs.gaugeProgress.style.strokeDashoffset = `${283 - (risk / 10) * 283}`; refs.miniStatus.textContent = band.label; refs.miniTime.textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
             const trend = getTrendSummary(); refs.miniTrend.textContent = trend.label; refs.miniTrend.title = trend.detail;
             const tips = getPersonalizedAdvice(inputs); refs.advice.innerHTML = `<strong>Recommendation:</strong> ${tips[0]}`; refs.advice.style.display = 'block'; refs.tipsList.innerHTML = tips.map((tip) => `<li>${tip}</li>`).join(''); refs.tips.style.display = 'block';
             addRiskHistory(risk); updateHistoryTable(); drawGraph(); saveData();
-            setTimeout(() => { sendRiskAnalysisToAI(inputs, risk); }, 450);
+            if (options.announceAi) {
+                await sendRiskAnalysisToAI(inputs, risk);
+            } else {
+                sendRiskAnalysisToAI(inputs, risk);
+            }
         }
 
         function addRiskHistory(risk) { state.riskHistory.push(risk); if (state.riskHistory.length > 14) state.riskHistory.shift(); }
