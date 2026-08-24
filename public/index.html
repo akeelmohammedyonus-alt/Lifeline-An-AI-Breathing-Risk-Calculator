@@ -14,18 +14,18 @@
         }
 
         :root {
-            --bg: #081b22;
-            --bg-2: #123b3c;
-            --panel: rgba(7, 28, 32, 0.82);
-            --panel-raised: rgba(13, 49, 49, 0.9);
-            --border: rgba(160, 218, 177, 0.24);
-            --text: #f2f8ed;
-            --muted: #a8c8bf;
-            --accent: #9ed36a;
-            --accent-2: #5dd1bd;
+            --bg: #071426;
+            --bg-2: #102c4b;
+            --panel: rgba(7, 22, 42, 0.88);
+            --panel-raised: rgba(15, 45, 76, 0.94);
+            --border: rgba(126, 190, 235, 0.28);
+            --text: #eef7ff;
+            --muted: #a8c5da;
+            --accent: #6fc7ff;
+            --accent-2: #54d1c7;
             --warning: #f2bd62;
             --danger: #ff7d73;
-            --shadow: 0 22px 55px rgba(0, 11, 14, 0.34);
+            --shadow: 0 22px 55px rgba(0, 7, 20, 0.42);
         }
 
         * {
@@ -40,7 +40,7 @@
             min-height: 100vh;
             padding: 20px;
             overflow-x: hidden;
-            background: radial-gradient(circle at 14% 8%, rgba(158, 211, 106, 0.16), transparent 25%), radial-gradient(circle at 88% 86%, rgba(93, 209, 189, 0.16), transparent 30%), linear-gradient(135deg, var(--bg) 0%, var(--bg-2) 55%, #0a242b 100%);
+            background: radial-gradient(circle at 14% 8%, rgba(84, 209, 199, 0.16), transparent 25%), radial-gradient(circle at 88% 86%, rgba(111, 199, 255, 0.18), transparent 30%), linear-gradient(135deg, var(--bg) 0%, var(--bg-2) 55%, #081b35 100%);
             position: relative;
             -webkit-font-smoothing: antialiased;
             text-rendering: optimizeLegibility;
@@ -282,8 +282,8 @@
         .edu-hero {
             padding: 22px;
             border-radius: 24px;
-            background: #102c32;
-            border: 1px solid rgba(173, 231, 190, 0.26);
+            background: #0d2948;
+            border: 1px solid rgba(126, 190, 235, 0.3);
             box-shadow: var(--shadow);
             min-width: 0;
         }
@@ -297,8 +297,8 @@
         .edu-card {
             padding: 20px;
             border-radius: 20px;
-            background: #173b3d;
-            border: 1px solid rgba(173, 231, 190, 0.2);
+            background: #12365a;
+            border: 1px solid rgba(126, 190, 235, 0.24);
         }
 
         .edu-card h3 {
@@ -309,7 +309,7 @@
 
         .edu-card p,
         .edu-card li {
-            color: #c7ded5;
+            color: #c6dced;
             line-height: 1.6;
             font-size: 0.86rem;
         }
@@ -321,19 +321,56 @@
             margin-top: 12px;
         }
 
+        .respiratory-diagram {
+            display: grid;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
         .diagram .node {
+            width: 100%;
             padding: 12px;
+            min-height: 78px;
             border-radius: 14px;
-            background: rgba(57, 167, 255, 0.12);
-            border: 1px solid rgba(57, 167, 255, 0.2);
+            background: rgba(84, 169, 235, 0.14);
+            border: 1px solid rgba(126, 190, 235, 0.28);
             text-align: center;
             font-size: 0.9rem;
-            color: #dceeff;
+            color: #e3f3ff;
+            cursor: pointer;
+            font: inherit;
+            transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+        }
+
+        .diagram .node:hover,
+        .diagram .node:focus-visible,
+        .diagram .node.active {
+            background: rgba(84, 209, 199, 0.2);
+            border-color: var(--accent-2);
+            outline: none;
+            transform: translateY(-2px);
         }
 
         .diagram .node strong {
             display: block;
             margin-bottom: 4px;
+        }
+
+        .diagram-detail {
+            min-height: 88px;
+            padding: 12px 14px;
+            border-left: 3px solid var(--accent-2);
+            border-radius: 10px;
+            background: rgba(84, 209, 199, 0.1);
+            color: #cde7f7;
+            font-size: 0.84rem;
+            line-height: 1.6;
+        }
+
+        .diagram-detail strong {
+            display: block;
+            color: #f0fbff;
+            margin-bottom: 3px;
         }
 
         .illness-grid {
@@ -1402,10 +1439,13 @@
                                 <li><strong>76–100: High Stress</strong> — Strong physiological or emotional pressure. Airways can tighten, increasing asthma risk.</li>
                             </ul>
                         </div>
-                        <div class="diagram">
-                            <div class="node"><strong>Air entry</strong>nose and throat</div>
-                            <div class="node"><strong>Airways</strong>bronchi and bronchioles</div>
-                            <div class="node"><strong>Gas exchange</strong>lungs and alveoli</div>
+                        <div class="respiratory-diagram" aria-label="Interactive respiratory system diagram">
+                            <div class="diagram">
+                                <button class="node active" type="button" data-part="entry" aria-pressed="true"><strong>Air entry</strong>nose and throat</button>
+                                <button class="node" type="button" data-part="airways" aria-pressed="false"><strong>Airways</strong>bronchi and bronchioles</button>
+                                <button class="node" type="button" data-part="exchange" aria-pressed="false"><strong>Gas exchange</strong>lungs and alveoli</button>
+                            </div>
+                            <div class="diagram-detail" id="diagramDetail" role="status" aria-live="polite"><strong>Air entry</strong>The nose and throat warm, humidify, and filter incoming air before it moves deeper into the respiratory system.</div>
                         </div>
                     </div>
                     <div class="edu-card">
@@ -1579,7 +1619,7 @@
         const state = { riskHistory: [], lastRisk: 0, conversationContext: [], environment: null, userProfile: { triggers: [], preferences: {}, riskPatterns: [], conversationCount: 0, lastAssessment: null } };
         const refs = {
             temp: document.getElementById('temp'), humidity: document.getElementById('humidity'), airq: document.getElementById('airq'), activity: document.getElementById('activity'), stress: document.getElementById('stress'),
-            airqValue: document.getElementById('airqValue'), activityValue: document.getElementById('activityValue'), stressValue: document.getElementById('stressValue'), result: document.getElementById('result'), emojiResult: document.getElementById('emojiResult'), advice: document.getElementById('advice'), tips: document.getElementById('tips'), tipsList: document.getElementById('tipsList'), graphCanvas: document.getElementById('graphCanvas'), historyTable: document.getElementById('historyTable'), chatBox: document.getElementById('chatBox'), chatInput: document.getElementById('chatInput'), gaugeScore: document.getElementById('gaugeScore'), gaugeLabel: document.getElementById('gaugeLabel'), gaugeSummary: document.getElementById('gaugeSummary'), gaugeProgress: document.getElementById('gaugeProgress'), miniStatus: document.getElementById('miniStatus'), miniTrend: document.getElementById('miniTrend'), miniTime: document.getElementById('miniTime'), useLocationBtn: document.getElementById('useLocationBtn'), locationStatus: document.getElementById('locationStatus'), weatherWidget: document.getElementById('weatherWidget'), weatherTemperature: document.getElementById('weatherTemperature'), weatherDescription: document.getElementById('weatherDescription'), weatherAqi: document.getElementById('weatherAqi'), weatherHumidity: document.getElementById('weatherHumidity'), weatherFeelsLike: document.getElementById('weatherFeelsLike'), weatherWind: document.getElementById('weatherWind')
+            airqValue: document.getElementById('airqValue'), activityValue: document.getElementById('activityValue'), stressValue: document.getElementById('stressValue'), result: document.getElementById('result'), emojiResult: document.getElementById('emojiResult'), advice: document.getElementById('advice'), tips: document.getElementById('tips'), tipsList: document.getElementById('tipsList'), graphCanvas: document.getElementById('graphCanvas'), historyTable: document.getElementById('historyTable'), chatBox: document.getElementById('chatBox'), chatInput: document.getElementById('chatInput'), gaugeScore: document.getElementById('gaugeScore'), gaugeLabel: document.getElementById('gaugeLabel'), gaugeSummary: document.getElementById('gaugeSummary'), gaugeProgress: document.getElementById('gaugeProgress'), miniStatus: document.getElementById('miniStatus'), miniTrend: document.getElementById('miniTrend'), miniTime: document.getElementById('miniTime'), useLocationBtn: document.getElementById('useLocationBtn'), locationStatus: document.getElementById('locationStatus'), weatherWidget: document.getElementById('weatherWidget'), weatherTemperature: document.getElementById('weatherTemperature'), weatherDescription: document.getElementById('weatherDescription'), weatherAqi: document.getElementById('weatherAqi'), weatherHumidity: document.getElementById('weatherHumidity'), weatherFeelsLike: document.getElementById('weatherFeelsLike'), weatherWind: document.getElementById('weatherWind'), diagramDetail: document.getElementById('diagramDetail')
         };
         const aiMemory = { conversationHistory: [], learnedTriggers: [], riskTrends: { improving: false, worsening: false }, userGoals: [], suggestedActions: [] };
 
@@ -1595,6 +1635,7 @@
             document.getElementById('sendChatBtn').addEventListener('click', handleChat);
             refs.useLocationBtn.addEventListener('click', loadLocalConditions);
             refs.chatInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') handleChat(); });
+            document.querySelectorAll('.diagram .node').forEach((node) => node.addEventListener('click', () => selectRespiratoryPart(node)));
             window.addEventListener('resize', drawGraph);
         }
 
@@ -1619,6 +1660,7 @@
             }
         }
         function readInputs() { return { temp: Number(refs.temp.value || 0), humidity: Number(refs.humidity.value || 0), airq: Number(refs.airq.value || 3), activity: Number(refs.activity.value || 2), stress: Number(refs.stress.value || 2) }; }
+        function selectRespiratoryPart(node) { const details = { entry: ['Air entry', 'The nose and throat warm, humidify, and filter incoming air before it moves deeper into the respiratory system.'], airways: ['Airways', 'The bronchi and bronchioles carry air into the lungs. In asthma, inflammation and muscle tightening can narrow these passages.'], exchange: ['Gas exchange', 'The alveoli exchange oxygen and carbon dioxide with the blood. Healthy, open air sacs help the body use oxygen efficiently.'] }; const detail = details[node.dataset.part]; if (!detail) return; document.querySelectorAll('.diagram .node').forEach((item) => { const active = item === node; item.classList.toggle('active', active); item.setAttribute('aria-pressed', String(active)); }); refs.diagramDetail.innerHTML = `<strong>${detail[0]}</strong>${detail[1]}`; }
         function scrollToRiskAssessment() {
             const panel = document.getElementById('riskAssessmentCard');
             panel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
